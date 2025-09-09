@@ -13,6 +13,10 @@ pub struct SubEntry {
 }
 
 impl SubEntry {
+    pub fn peek(input: syn::parse::ParseStream) -> bool {
+        input.peek(Brace)
+    }
+    
     pub fn into_tokens(self, state: &mut crate::EntryState) -> syn::Result<TokenStream> {
         self.entries.into_tokens(state)
     }

@@ -1,11 +1,19 @@
-use proc_macro2::TokenStream;
-use quote::ToTokens;
+use proc_macro2::{Literal, TokenStream};
+use quote::{ToTokens, quote};
 use syn::{Error, LitByte, LitByteStr, LitCStr, LitInt};
 
 use crate::{
     EntryState,
     to_bytes::{Endianness, IntType, base10_digits_to_bytes},
 };
+
+fn new_literal_bytes_stmt(state: &mut EntryState, bytes: &[u8]) -> TokenStream {
+    let data_var = state.data_var();
+    let byte_literals: Vec<_> = bytes.iter().map(|b| Literal::u8_suffixed(*b)).collect();
+    quote! {
+        #data_var.extend_from_slice(&[#(#byte_literals),*]);
+    }
+}
 
 fn parse_byte_literal<T>(
     err_context: &T,
@@ -101,9 +109,13 @@ pub struct IntLiteral {
 }
 
 impl IntLiteral {
+    pub fn peek(input: syn::parse::ParseStream) -> bool {
+        input.peek(LitInt)
+    }
+
     pub fn into_tokens(self, state: &mut EntryState) -> syn::Result<TokenStream> {
         let bytes: Vec<_> = parse_int_literal(state.endian_mode(), self.value)?;
-        Ok(super::new_literal_bytes_stmt(state, &bytes))
+        Ok(new_literal_bytes_stmt(state, &bytes))
     }
 }
 
@@ -113,9 +125,12 @@ pub struct ByteLiteral {
 }
 
 impl ByteLiteral {
+    pub fn peek(input: syn::parse::ParseStream) -> bool {
+        input.peek(LitByte)
+    }
     pub fn into_tokens(self, state: &mut EntryState) -> syn::Result<TokenStream> {
         let byte = self.value.value();
-        Ok(super::new_literal_bytes_stmt(state, &[byte]))
+        Ok(new_literal_bytes_stmt(state, &[byte]))
     }
 }
 
@@ -125,9 +140,13 @@ pub struct ByteStringLiteral {
 }
 
 impl ByteStringLiteral {
+    pub fn peek(input: syn::parse::ParseStream) -> bool {
+        input.peek(LitByteStr)
+    }
+
     pub fn into_tokens(self, state: &mut EntryState) -> syn::Result<TokenStream> {
         let bytes = self.value.value();
-        Ok(super::new_literal_bytes_stmt(state, &bytes))
+        Ok(new_literal_bytes_stmt(state, &bytes))
     }
 }
 
@@ -137,9 +156,13 @@ pub struct CStringLiteral {
 }
 
 impl CStringLiteral {
+    pub fn peek(input: syn::parse::ParseStream) -> bool {
+        input.peek(LitCStr)
+    }
+
     pub fn into_tokens(self, state: &mut EntryState) -> syn::Result<TokenStream> {
         let c_string = self.value.value();
         let bytes = c_string.as_bytes_with_nul();
-        Ok(super::new_literal_bytes_stmt(state, bytes))
+        Ok(new_literal_bytes_stmt(state, bytes))
     }
 }

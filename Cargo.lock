@@ -4,14 +4,14 @@ version = 4
 
 [[package]]
 name = "datalit"
-version = "0.1.0"
+version = "0.1.0-prerelease"
 dependencies = [
  "datalit-macros",
 ]
 
 [[package]]
 name = "datalit-macros"
-version = "0.1.0"
+version = "0.1.0-prerelease"
 dependencies = [
  "derive-syn-parse",
  "proc-macro-crate",

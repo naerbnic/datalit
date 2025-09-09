@@ -79,7 +79,12 @@ TBD.
 
 ## License
 
-TBD.
+This project is dual-licensed under either the MIT or Apache 2.0 license, at your option.
+
+- See [LICENSE-MIT](./LICENSE-MIT) for the MIT license text.
+- See [LICENSE-APACHE](./LICENSE-APACHE) for the Apache 2.0 license text.
+
+You may use this project under the terms of either license.
 
 ## Acknowledgements
 

@@ -1,5 +1,16 @@
 use syn::Ident;
 
+fn consume_suffix(suffix: &mut &str, to_consume: &str) -> bool {
+    if suffix.ends_with(to_consume) {
+        let trimmed = suffix.trim_end_matches(to_consume);
+        let trimmed = trimmed.trim_end_matches('_');
+        *suffix = trimmed;
+        true
+    } else {
+        false
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum Endianness {
     Little,
@@ -18,6 +29,18 @@ impl Endianness {
             Endianness::Little => Ident::new("to_le_bytes", proc_macro2::Span::call_site()),
             Endianness::Big => Ident::new("to_be_bytes", proc_macro2::Span::call_site()),
             Endianness::Native => Ident::new("to_ne_bytes", proc_macro2::Span::call_site()),
+        }
+    }
+
+    pub fn parse_from_suffix(suffix: &mut &str) -> Option<Self> {
+        if consume_suffix(suffix, "le") {
+            Some(Endianness::Little)
+        } else if consume_suffix(suffix, "be") {
+            Some(Endianness::Big)
+        } else if consume_suffix(suffix, "ne") {
+            Some(Endianness::Native)
+        } else {
+            None
         }
     }
 }

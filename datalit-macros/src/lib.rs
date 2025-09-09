@@ -1,12 +1,13 @@
 mod entry;
-mod entry_state;
+mod state;
 mod to_bytes;
+mod parse;
 
 use proc_macro::TokenStream as BaseTokenStream;
 use proc_macro2::TokenStream;
 use quote::quote;
 
-use crate::{entry::DataLitEntries, entry_state::EntryState};
+use crate::{entry::DataLitEntries, state::EntryState};
 
 const BASE_CRATE: &str = "datalit";
 

@@ -1,0 +1,7 @@
+[package]
+name = "datalit"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+datalit-macros = { path = "../datalit-macros" }

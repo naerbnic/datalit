@@ -1,3 +1,5 @@
+
+#[doc = include_str!("../docs/datalit.md")]
 pub use datalit_macros::datalit;
 
 #[cfg(test)]
@@ -139,6 +141,17 @@ mod tests {
                 }; 2]
             ),
             &*vec![1u8, 0u8, 2u8, 1u8, 2u8]
+        );
+    }
+
+    #[test]
+    #[ignore = "syn panics on invalid byte literal"]
+    fn test_datalit_macro() {
+        datalit!(
+            @endian_mode = le,
+            // It appears that when syn tries to parse an invalid byte literal,
+            // it will panic instead of returning a parse error.
+            // b'CAFEBABE',
         );
     }
 }

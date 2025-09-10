@@ -1,7 +1,6 @@
-use proc_macro2::TokenStream;
 use syn::token::Brace;
 
-use crate::DataLitEntries;
+use crate::{DataLitEntries, EntryState, state::StateOperation};
 
 #[derive(derive_syn_parse::Parse)]
 pub struct SubEntry {
@@ -16,8 +15,10 @@ impl SubEntry {
     pub fn peek(input: syn::parse::ParseStream) -> bool {
         input.peek(Brace)
     }
-    
-    pub fn into_tokens(self, state: &mut crate::EntryState) -> syn::Result<TokenStream> {
-        self.entries.into_tokens(state)
+}
+
+impl StateOperation for SubEntry {
+    fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
+        self.entries.apply_to(state)
     }
 }

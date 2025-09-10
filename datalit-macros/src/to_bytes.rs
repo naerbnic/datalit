@@ -1,4 +1,6 @@
-use syn::Ident;
+use std::str::FromStr;
+
+use num::ToPrimitive as _;
 
 fn consume_suffix(suffix: &mut &str, to_consume: &str) -> bool {
     if suffix.ends_with(to_consume) {
@@ -11,6 +13,10 @@ fn consume_suffix(suffix: &mut &str, to_consume: &str) -> bool {
     }
 }
 
+const _: () = {
+    assert!(std::mem::size_of::<usize>() <= std::mem::size_of::<u64>());
+};
+
 #[derive(Debug, Clone, Copy)]
 pub enum Endianness {
     Little,
@@ -19,19 +25,6 @@ pub enum Endianness {
 }
 
 impl Endianness {
-    pub fn is_be(self) -> bool {
-        matches!(self, Endianness::Big)
-            || (matches!(self, Endianness::Native) && cfg!(target_endian = "big"))
-    }
-
-    pub fn to_func_name(self) -> Ident {
-        match self {
-            Endianness::Little => Ident::new("to_le_bytes", proc_macro2::Span::call_site()),
-            Endianness::Big => Ident::new("to_be_bytes", proc_macro2::Span::call_site()),
-            Endianness::Native => Ident::new("to_ne_bytes", proc_macro2::Span::call_site()),
-        }
-    }
-
     pub fn parse_from_suffix(suffix: &mut &str) -> Option<Self> {
         if consume_suffix(suffix, "le") {
             Some(Endianness::Little)
@@ -43,29 +36,18 @@ impl Endianness {
             None
         }
     }
-}
 
-pub trait ToBytes {
-    fn to_bytes(&self, endianness: Endianness) -> Vec<u8>;
+    pub fn to_bytes<T>(self, number: T) -> T::Bytes
+    where
+        T: num::traits::ToBytes,
+    {
+        match self {
+            Endianness::Little => number.to_le_bytes(),
+            Endianness::Big => number.to_be_bytes(),
+            Endianness::Native => number.to_ne_bytes(),
+        }
+    }
 }
-
-macro_rules! impl_to_bytes_for_primitive {
-    ($($t:ty),*) => {
-        $(
-            impl ToBytes for $t {
-                fn to_bytes(&self, endianness: Endianness) -> Vec<u8> {
-                    match endianness {
-                        Endianness::Little => self.to_le_bytes().to_vec(),
-                        Endianness::Big => self.to_be_bytes().to_vec(),
-                        Endianness::Native => self.to_ne_bytes().to_vec(),
-                    }
-                }
-            }
-        )*
-    };
-}
-
-impl_to_bytes_for_primitive!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, f32, f64);
 
 #[derive(Debug, thiserror::Error)]
 #[error("Value out of range for u24 (must be 0..=16777215)")]
@@ -83,14 +65,33 @@ impl U24 {
     }
 }
 
-impl ToBytes for U24 {
-    fn to_bytes(&self, endianness: Endianness) -> Vec<u8> {
-        let mut bytes: [u8; 3] = self.0.to_le_bytes()[0..3].try_into().unwrap();
-        if endianness.is_be() {
-            bytes.reverse();
-        }
+impl FromStr for U24 {
+    type Err = InvalidU24Error;
 
-        bytes.to_vec()
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value: u32 = s.parse().map_err(|_| InvalidU24Error)?;
+        U24::new(value)
+    }
+}
+
+impl TryFrom<&num::BigInt> for U24 {
+    type Error = InvalidU24Error;
+
+    fn try_from(value: &num::BigInt) -> Result<Self, Self::Error> {
+        let u32_value: u32 = value.to_u32().ok_or(InvalidU24Error)?;
+        U24::new(u32_value)
+    }
+}
+
+impl num::traits::ToBytes for U24 {
+    type Bytes = [u8; 3];
+
+    fn to_be_bytes(&self) -> Self::Bytes {
+        self.0.to_be_bytes()[1..4].try_into().unwrap()
+    }
+
+    fn to_le_bytes(&self) -> Self::Bytes {
+        self.0.to_le_bytes()[0..3].try_into().unwrap()
     }
 }
 
@@ -127,29 +128,49 @@ impl IntType {
         }
     }
 
-    pub fn to_type(self) -> Ident {
-        let ident = match self {
-            IntType::U8 => "u8",
-            IntType::U16 => "u16",
-            IntType::U24 | IntType::U32 => "u32",
-            IntType::U64 => "u64",
-            IntType::USize => "usize",
-            IntType::I8 => "i8",
-            IntType::I16 => "i16",
-            IntType::I32 => "i32",
-            IntType::I64 => "i64",
-            IntType::ISize => "isize",
-        };
-        quote::format_ident!("{}", ident)
-    }
-
-    pub fn to_byte_size(self) -> usize {
+    pub fn num_bytes(self) -> usize {
         match self {
             IntType::U8 | IntType::I8 => 1,
             IntType::U16 | IntType::I16 => 2,
-            IntType::U24 | IntType::U32 | IntType::I32 => 4,
+            IntType::U24 => 3,
+            IntType::U32 | IntType::I32 => 4,
             IntType::U64 | IntType::I64 => 8,
             IntType::USize | IntType::ISize => std::mem::size_of::<usize>(),
+        }
+    }
+
+    pub fn write_bytes_from_bigint(
+        self,
+        n: &num::BigInt,
+        endianness: Endianness,
+        dest: &mut [u8],
+    ) -> syn::Result<()> {
+        macro_rules! impl_for {
+            ($t:ty) => {{
+                let value: $t = <$t as TryFrom<&num::BigInt>>::try_from(n).map_err(|_| {
+                    syn::Error::new(
+                        proc_macro2::Span::call_site(),
+                        format!("Value {} out of range for {}", n, stringify!($t)),
+                    )
+                })?;
+                let bytes = endianness.to_bytes(value);
+                dest[..bytes.len()].copy_from_slice(&bytes);
+                Ok(())
+            }};
+        }
+
+        match self {
+            IntType::U8 => impl_for!(u8),
+            IntType::U16 => impl_for!(u16),
+            IntType::U24 => impl_for!(U24),
+            IntType::U32 => impl_for!(u32),
+            IntType::U64 => impl_for!(u64),
+            IntType::USize => impl_for!(usize),
+            IntType::I8 => impl_for!(i8),
+            IntType::I16 => impl_for!(i16),
+            IntType::I32 => impl_for!(i32),
+            IntType::I64 => impl_for!(i64),
+            IntType::ISize => impl_for!(isize),
         }
     }
 }
@@ -167,24 +188,13 @@ pub fn base10_digits_to_bytes(
                     format!("Failed to parse {}: {e}", stringify!($t)),
                 )
             })?;
-            Ok(ToBytes::to_bytes(&value, endianness))
+            Ok(endianness.to_bytes(value).to_vec())
         }};
     }
     match int_type {
         IntType::U8 => parse_int!(u8, digits),
         IntType::U16 => parse_int!(u16, digits),
-        IntType::U24 => {
-            let value: u32 = digits.parse().map_err(|e| {
-                syn::Error::new(
-                    proc_macro2::Span::call_site(),
-                    format!("Failed to parse u24: {e}"),
-                )
-            })?;
-            let u24 = U24::new(value).map_err(|e| {
-                syn::Error::new(proc_macro2::Span::call_site(), format!("Invalid u24: {e}"))
-            })?;
-            Ok(ToBytes::to_bytes(&u24, endianness))
-        }
+        IntType::U24 => parse_int!(U24, digits),
         IntType::U32 => parse_int!(u32, digits),
         IntType::U64 => parse_int!(u64, digits),
         IntType::USize => parse_int!(usize, digits),

@@ -1,8 +1,6 @@
-use proc_macro2::TokenStream;
-use quote::quote;
 use syn::punctuated::Punctuated;
 
-use crate::EntryState;
+use crate::{EntryState, state::StateOperation};
 
 use super::DataLitEntry;
 
@@ -12,16 +10,11 @@ pub struct DataLitEntries {
     entries: Punctuated<DataLitEntry, syn::Token![,]>,
 }
 
-impl DataLitEntries {
-    pub fn into_tokens(self, state: &mut EntryState) -> syn::Result<TokenStream> {
-        let mut data_statements = Vec::new();
-        for entry in self.entries {
-            data_statements.push(entry.into_tokens(state)?);
+impl StateOperation for DataLitEntries {
+    fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
+        for entry in &self.entries {
+            entry.apply_to(state)?;
         }
-        Ok(quote! {
-            {
-                #(#data_statements)*
-            }
-        })
+        Ok(())
     }
 }

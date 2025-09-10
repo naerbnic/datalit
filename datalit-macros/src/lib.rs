@@ -1,15 +1,16 @@
 mod entry;
+mod parse;
 mod state;
 mod to_bytes;
-mod parse;
 
 use proc_macro::TokenStream as BaseTokenStream;
 use proc_macro2::TokenStream;
 use quote::quote;
 
-use crate::{entry::DataLitEntries, state::EntryState};
-
-const BASE_CRATE: &str = "datalit";
+use crate::{
+    entry::DataLitEntries,
+    state::{EntryState, StateOperation as _},
+};
 
 #[proc_macro]
 pub fn datalit(input: BaseTokenStream) -> BaseTokenStream {
@@ -25,7 +26,7 @@ fn datalit_impl(input: TokenStream) -> syn::Result<TokenStream> {
     let entries: DataLitEntries = syn::parse2(input)?;
 
     let mut state = EntryState::new();
-    let contents = entries.into_tokens(&mut state)?;
+    entries.apply_to(&mut state)?;
     state.check()?;
-    Ok(state.generate_expr(contents))
+    state.generate_expr()
 }

@@ -8,12 +8,12 @@ mod sequence;
 use crate::state::{EntryState, StateOperation};
 
 pub use self::{
-    block::SubEntry,
+    block::BlockEntry,
     call::CallEntry,
     labeled::LabeledEntry,
     literal::{ByteLiteral, ByteStringLiteral, CStringLiteral, IntLiteral},
     mode_change::ModeChange,
-    sequence::DataLitEntries,
+    sequence::SequenceEntry,
 };
 
 macro_rules! build_variant {
@@ -43,13 +43,13 @@ macro_rules! build_variant {
 }
 
 build_variant! {
-    enum DataLitEntry {
+    enum Entry {
         (IntLiteral, "integer literal"),
         (ByteStringLiteral, "byte string literal"),
         (ByteLiteral, "byte literal"),
         (CStringLiteral, "C-style string literal"),
-        (SubEntry, "braced list of entries"),
-        (LabeledEntry, "labelled entry"),
+        (BlockEntry, "braced list of entries"),
+        (LabeledEntry, "labeled entry"),
         (CallEntry, "call entry"),
         (ModeChange, "mode change"),
     }

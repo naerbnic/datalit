@@ -1,23 +1,23 @@
 use syn::token::Brace;
 
-use crate::{DataLitEntries, EntryState, state::StateOperation};
+use crate::{SequenceEntry, EntryState, state::StateOperation};
 
 #[derive(derive_syn_parse::Parse)]
-pub struct SubEntry {
+pub struct BlockEntry {
     #[brace]
     _brace_token: Brace,
 
     #[inside(_brace_token)]
-    entries: DataLitEntries,
+    entries: SequenceEntry,
 }
 
-impl SubEntry {
+impl BlockEntry {
     pub fn peek(input: syn::parse::ParseStream) -> bool {
         input.peek(Brace)
     }
 }
 
-impl StateOperation for SubEntry {
+impl StateOperation for BlockEntry {
     fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
         self.entries.apply_to(state)
     }

@@ -8,7 +8,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 
 use crate::{
-    entry::DataLitEntries,
+    entry::SequenceEntry,
     state::{EntryState, StateOperation as _},
 };
 
@@ -23,7 +23,7 @@ pub fn datalit(input: BaseTokenStream) -> BaseTokenStream {
 }
 
 fn datalit_impl(input: TokenStream) -> syn::Result<TokenStream> {
-    let entries: DataLitEntries = syn::parse2(input)?;
+    let entries: SequenceEntry = syn::parse2(input)?;
 
     let mut state = EntryState::new();
     entries.apply_to(&mut state)?;

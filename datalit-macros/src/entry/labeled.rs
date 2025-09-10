@@ -2,13 +2,13 @@ use syn::{Lifetime, parse::ParseStream};
 
 use crate::{EntryState, state::StateOperation};
 
-use super::DataLitEntry;
+use super::Entry;
 
 #[derive(derive_syn_parse::Parse)]
 pub struct LabeledEntry {
     label: Lifetime,
     #[prefix(syn::Token![:])]
-    sub_entry: Box<DataLitEntry>,
+    sub_entry: Box<Entry>,
 }
 
 impl LabeledEntry {

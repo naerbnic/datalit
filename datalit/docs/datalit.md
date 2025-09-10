@@ -52,19 +52,19 @@ The contents of `datalit!()` are a sequence of individual entries which define
 data that will be added to the buffer in the order provided. The different entry
 types are:
 
-- Untyped Hex Literals: `0x0123_4567_89AB_CDEF`
+- **Untyped Hex Literals**: `0x0123_4567_89AB_CDEF`
 
   These represent the exact bytes provided, as read from left to right. These
   have no maximum length even if the data is larger than a
   machine-representable number, but there must be a multiple of 2 hexidecimanl
   digits.
 
-- Untyped Binary Literals: `0b00111100`
+- **Untyped Binary Literals**: `0b00111100`
 
   These follow the same principles as untyped hex literals, but their digits
   must be a multiple of 8 instead.
 
-- Typed integer literals: `12u32le`
+- **Typed integer literals**: `12u32le`
 
   These are integer literals that will be written at the current location in
   the byte order specified in the annotated type, or the current endian mode
@@ -72,50 +72,50 @@ types are:
   rust types are supported, both signed and unsigned variants. In addition,
   we support the `u24` suffix to represent a 3-byte integer as well.
 
-- Byte literals: `b'X'`
+- **Byte literals**: `b'X'`
 
   The given byte is written in the data directly.
 
-- Byte string literals: `b"TIFF"`
+- **Byte string literals**: `b"TIFF"`
 
   The byte sequence is written in the data directly.
 
-- C-string literals: `c"Hello, world!\n"`
+- **C-string literals**: `c"Hello, world!\n"`
 
   These operate similarly to byte strings, but also write the trailing null
   into the data.
 
-- Entry labels: `'data: b"some data"`
+- **Entry labels**: `'data: b"some data"`
 
   The labeled entry is written into the data as written, but the bounds of that
   data are recorded for use in other expressions. See the expressions section
   for more information.
 
-- Blocks: `{ 1u32, 2u32, }`
+- **Blocks**: `{ 1u32, 2u32, }`
 
   A block writes its contents into the data in the order provided. This can be
   used for visual grouping. When a block is labeled, the bounds of the label
   span from before the block to after the block.
 
-- Simple arrays: `[ 0u8; 100 ]`
+- **Simple arrays**: `[ 0u8; 100 ]`
 
   Any array writes its single value entry the number of times specified by the
   length (after the semicolon). The length is interpreted as it's explicit
   value, and must not be suffixed with a specific type.
 
-- Compound arrays: `[{ 1u8, 2u32 }; 20]`
+- **Compound arrays**: `[{ 1u8, 2u32 }; 20]`
 
   Repeats its contents like simple arrays, but allows any number of entries
   within the braces. While expressions from within the array can reference
   labels, no labels can be defined inside of the braces.
 
-- Align: `align(4)`
+- **Align**: `align(4)`
 
   Aligns the current data location to the given number. The number must be a
   power of two. If the current data location is already aligned, this does
   nothing.
 
-- Expression: `start('data): u32`
+- **Expression**: `start('data): u32`
 
   Gives an expression that can be evaluated to determine the value. This is
   used to interact with labels. See the documentation on expressions for more

@@ -111,4 +111,35 @@ mod tests {
             &*vec![0xFFu8, 0xFF, 1u8, 12u8, 0u8, 2u8, 5u8, 3u8]
         )
     }
+
+    #[test]
+    fn supports_repeat() {
+        assert_eq!(
+            datalit!(
+                // Simple single literal repeat
+                [1u8; 3]
+            ),
+            &*vec![1u8, 1u8, 1u8,]
+        );
+        assert_eq!(
+            datalit!(
+                // Compound request
+                [{1u8, 2u8}; 2]
+            ),
+            &*vec![1u8, 2u8, 1u8, 2u8]
+        );
+        assert_eq!(
+            datalit!(
+                // Works combined with directives
+                [{
+                    1u8,
+                    // First time through will add 1 byte of padding,
+                    // Second time will add nothing since already aligned
+                    align(2),
+                    2u8
+                }; 2]
+            ),
+            &*vec![1u8, 0u8, 2u8, 1u8, 2u8]
+        );
+    }
 }

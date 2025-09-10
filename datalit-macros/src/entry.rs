@@ -3,6 +3,7 @@ mod call;
 mod labeled;
 mod literal;
 mod mode_change;
+mod repeat;
 mod sequence;
 
 use crate::state::{EntryState, StateOperation};
@@ -13,6 +14,7 @@ pub use self::{
     labeled::LabeledEntry,
     literal::{ByteLiteral, ByteStringLiteral, CStringLiteral, IntLiteral},
     mode_change::ModeChange,
+    repeat::RepeatEntry,
     sequence::SequenceEntry,
 };
 
@@ -50,6 +52,7 @@ build_variant! {
         (CStringLiteral, "C-style string literal"),
         (BlockEntry, "braced list of entries"),
         (LabeledEntry, "labeled entry"),
+        (RepeatEntry, "repeated entry"),
         (CallEntry, "call entry"),
         (ModeChange, "mode change"),
     }

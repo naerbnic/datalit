@@ -26,6 +26,7 @@ pub struct EntryState {
     defined_labels: BTreeMap<String, LabelInfo>,
     used_labels: BTreeMap<String, LabelRef>,
     endian_mode: Endianness,
+    num_frozen_label_contexts: usize,
 }
 
 impl EntryState {
@@ -37,6 +38,7 @@ impl EntryState {
             defined_labels: BTreeMap::new(),
             used_labels: BTreeMap::new(),
             endian_mode: Endianness::Native,
+            num_frozen_label_contexts: 0,
         }
     }
 
@@ -46,6 +48,12 @@ impl EntryState {
         start: usize,
         end: usize,
     ) -> syn::Result<()> {
+        if self.num_frozen_label_contexts > 0 {
+            return Err(syn::Error::new_spanned(
+                label,
+                "Cannot define labels within a frozen label context",
+            ));
+        }
         let label_str = label.ident.to_string();
         match self.defined_labels.entry(label_str) {
             Entry::Vacant(vacant) => {
@@ -145,6 +153,14 @@ impl EntryState {
         F: FnOnce(&LocationMap, &mut [u8]) -> syn::Result<()> + 'static,
     {
         self.patch_ops.push(PatchOp::new(f));
+    }
+
+    pub fn freeze_label_context(&mut self) {
+        self.num_frozen_label_contexts += 1;
+    }
+
+    pub fn unfreeze_label_context(&mut self) {
+        assert!(self.num_frozen_label_contexts > 0);
     }
 }
 

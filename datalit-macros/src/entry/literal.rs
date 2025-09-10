@@ -169,3 +169,35 @@ impl StateOperation for CStringLiteral {
         Ok(())
     }
 }
+
+#[derive(derive_syn_parse::Parse)]
+pub enum LiteralEntry {
+    #[peek_with(IntLiteral::peek, name = "integer literal")]
+    Int(IntLiteral),
+    #[peek_with(ByteLiteral::peek, name = "byte literal")]
+    Byte(ByteLiteral),
+    #[peek_with(ByteStringLiteral::peek, name = "byte string literal")]
+    ByteString(ByteStringLiteral),
+    #[peek_with(CStringLiteral::peek, name = "C string literal")]
+    CString(CStringLiteral),
+}
+
+impl LiteralEntry {
+    pub fn peek(input: syn::parse::ParseStream) -> bool {
+        IntLiteral::peek(input)
+            || ByteLiteral::peek(input)
+            || ByteStringLiteral::peek(input)
+            || CStringLiteral::peek(input)
+    }
+}
+
+impl StateOperation for LiteralEntry {
+    fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
+        match self {
+            LiteralEntry::Int(int_lit) => int_lit.apply_to(state),
+            LiteralEntry::Byte(byte_lit) => byte_lit.apply_to(state),
+            LiteralEntry::ByteString(byte_str_lit) => byte_str_lit.apply_to(state),
+            LiteralEntry::CString(cstr_lit) => cstr_lit.apply_to(state),
+        }
+    }
+}

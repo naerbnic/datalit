@@ -119,11 +119,12 @@ impl EntryState {
             .data
             .iter()
             .map(|b| syn::LitByte::new(*b, Span::call_site()));
-        Ok(quote! {
-            [
+        Ok(quote! {{
+            let __slice: &'static [u8] = &[
                 #(#byte_array),*
-            ]
-        })
+            ];
+            __slice
+        }})
     }
 
     pub fn append_bytes(&mut self, bytes: &[u8]) {

@@ -1,19 +1,11 @@
-use proc_macro2::{Literal, TokenStream};
-use quote::{ToTokens, quote};
+use quote::ToTokens;
 use syn::{Error, LitByte, LitByteStr, LitCStr, LitInt};
 
 use crate::{
     EntryState,
+    state::StateOperation,
     to_bytes::{Endianness, IntType, base10_digits_to_bytes},
 };
-
-fn new_literal_bytes_stmt(state: &mut EntryState, bytes: &[u8]) -> TokenStream {
-    let data_var = state.data_var();
-    let byte_literals: Vec<_> = bytes.iter().map(|b| Literal::u8_suffixed(*b)).collect();
-    quote! {
-        #data_var.extend_from_slice(&[#(#byte_literals),*]);
-    }
-}
 
 fn parse_byte_literal<T>(
     err_context: &T,
@@ -54,7 +46,8 @@ where
             )
         })
 }
-fn parse_int_literal(default_endianness: Endianness, lit: LitInt) -> syn::Result<Vec<u8>> {
+
+fn parse_int_literal(default_endianness: Endianness, lit: &LitInt) -> syn::Result<Vec<u8>> {
     let mut suffix = lit.suffix();
 
     if suffix.is_empty() {
@@ -71,7 +64,7 @@ fn parse_int_literal(default_endianness: Endianness, lit: LitInt) -> syn::Result
             return parse_byte_literal(&lit, "Binary", &bin_digits, 8);
         } else {
             return Err(Error::new_spanned(
-                &lit,
+                lit,
                 "Integer literal must have a type suffix (e.g. 'u8', 'i32', etc.) or be a hex (0x...) or binary (0b...) literal",
             ));
         }
@@ -95,7 +88,7 @@ fn parse_int_literal(default_endianness: Endianness, lit: LitInt) -> syn::Result
 
     let int_type = IntType::from_suffix(suffix).ok_or_else(|| {
         Error::new_spanned(
-            &lit,
+            lit,
             format!("Invalid or missing integer type suffix: '{}'", lit.suffix()),
         )
     })?;
@@ -112,10 +105,13 @@ impl IntLiteral {
     pub fn peek(input: syn::parse::ParseStream) -> bool {
         input.peek(LitInt)
     }
+}
 
-    pub fn into_tokens(self, state: &mut EntryState) -> syn::Result<TokenStream> {
-        let bytes: Vec<_> = parse_int_literal(state.endian_mode(), self.value)?;
-        Ok(new_literal_bytes_stmt(state, &bytes))
+impl StateOperation for IntLiteral {
+    fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
+        let bytes: Vec<_> = parse_int_literal(state.endian_mode(), &self.value)?;
+        state.append_bytes(&bytes);
+        Ok(())
     }
 }
 
@@ -128,9 +124,13 @@ impl ByteLiteral {
     pub fn peek(input: syn::parse::ParseStream) -> bool {
         input.peek(LitByte)
     }
-    pub fn into_tokens(self, state: &mut EntryState) -> syn::Result<TokenStream> {
+}
+
+impl StateOperation for ByteLiteral {
+    fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
         let byte = self.value.value();
-        Ok(new_literal_bytes_stmt(state, &[byte]))
+        state.append_bytes(&[byte]);
+        Ok(())
     }
 }
 
@@ -143,10 +143,12 @@ impl ByteStringLiteral {
     pub fn peek(input: syn::parse::ParseStream) -> bool {
         input.peek(LitByteStr)
     }
+}
 
-    pub fn into_tokens(self, state: &mut EntryState) -> syn::Result<TokenStream> {
-        let bytes = self.value.value();
-        Ok(new_literal_bytes_stmt(state, &bytes))
+impl StateOperation for ByteStringLiteral {
+    fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
+        state.append_bytes(&self.value.value());
+        Ok(())
     }
 }
 
@@ -159,10 +161,11 @@ impl CStringLiteral {
     pub fn peek(input: syn::parse::ParseStream) -> bool {
         input.peek(LitCStr)
     }
+}
 
-    pub fn into_tokens(self, state: &mut EntryState) -> syn::Result<TokenStream> {
-        let c_string = self.value.value();
-        let bytes = c_string.as_bytes_with_nul();
-        Ok(new_literal_bytes_stmt(state, bytes))
+impl StateOperation for CStringLiteral {
+    fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
+        state.append_bytes(self.value.value().as_bytes_with_nul());
+        Ok(())
     }
 }

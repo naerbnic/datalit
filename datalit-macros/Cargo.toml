@@ -10,6 +10,7 @@ proc-macro = true
 [dependencies]
 derive-syn-parse = "0.2.0"
 enum_dispatch = "0.3.13"
+num = { version = "0.4.3", features = ["num-bigint"] }
 proc-macro-crate = "3.3.0"
 proc-macro2 = "1.0.101"
 quote = "1.0.40"

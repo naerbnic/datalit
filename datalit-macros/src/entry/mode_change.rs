@@ -1,8 +1,6 @@
-use proc_macro2::TokenStream;
-use quote::quote;
-use syn::{Error, Ident, Result, parse::ParseStream};
+use syn::{Error, Ident, parse::ParseStream};
 
-use crate::{EntryState, to_bytes::Endianness};
+use crate::{EntryState, state::StateOperation, to_bytes::Endianness};
 
 #[derive(derive_syn_parse::Parse)]
 pub struct ModeChange {
@@ -16,8 +14,10 @@ impl ModeChange {
     pub fn peek(input: ParseStream) -> bool {
         input.peek(syn::Token![@]) && input.peek2(Ident) && input.peek3(syn::Token![=])
     }
+}
 
-    pub fn into_tokens(self, state: &mut EntryState) -> Result<TokenStream> {
+impl StateOperation for ModeChange {
+    fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
         let mode_str = self.mode.to_string();
         if mode_str != "endian_mode" {
             return Err(Error::new_spanned(
@@ -39,6 +39,6 @@ impl ModeChange {
             }
         };
         state.set_endian_mode(new_mode);
-        Ok(quote! {})
+        Ok(())
     }
 }

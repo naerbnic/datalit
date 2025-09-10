@@ -5,9 +5,7 @@ mod literal;
 mod mode_change;
 mod sequence;
 
-use proc_macro2::TokenStream;
-
-use crate::state::EntryState;
+use crate::state::{EntryState, StateOperation};
 
 pub use self::{
     block::SubEntry,
@@ -31,13 +29,14 @@ macro_rules! build_variant {
             )*
         }
 
-        impl $name {
-            pub fn into_tokens(self, state: &mut EntryState) -> syn::Result<TokenStream> {
-                Ok(match self {
+        impl StateOperation for $name {
+            fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
+                match self {
                     $(
-                        $name::$type(inner) => inner.into_tokens(state)?,
+                        $name::$type(inner) => inner.apply_to(state)?,
                     )*
-                })
+                }
+                Ok(())
             }
         }
     }

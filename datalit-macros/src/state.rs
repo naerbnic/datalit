@@ -1,56 +1,60 @@
+pub mod support;
+
 use std::collections::{BTreeMap, btree_map::Entry};
 
-use proc_macro_crate::FoundCrate;
 use proc_macro2::{Span, TokenStream};
-use quote::{format_ident, quote};
-use syn::{Ident, Lifetime};
+use quote::quote;
+use syn::Lifetime;
 
-use crate::to_bytes::Endianness;
+use crate::{
+    state::support::{LocationMap, PatchOp},
+    to_bytes::Endianness,
+};
 
 struct LabelInfo {
     source_token: Lifetime,
 }
 
+struct LabelRef {
+    source_token: Lifetime,
+}
+
 pub struct EntryState {
-    crate_name: TokenStream,
-    data_var: Ident,
+    data: Vec<u8>,
+    patch_ops: Vec<PatchOp>,
+    location_map: LocationMap,
     defined_labels: BTreeMap<String, LabelInfo>,
-    used_labels: BTreeMap<String, LabelInfo>,
-    loc_map_var: Ident,
-    patch_ops_var: Ident,
+    used_labels: BTreeMap<String, LabelRef>,
     endian_mode: Endianness,
 }
 
 impl EntryState {
     pub fn new() -> Self {
-        let data_var = syn::Ident::new("data", Span::call_site());
-        let loc_map_var = syn::Ident::new("loc_map", Span::call_site());
-        let patch_ops_var = syn::Ident::new("patch_ops", Span::call_site());
         Self {
-            crate_name: match proc_macro_crate::crate_name(crate::BASE_CRATE)
-                .expect("crate name lookup failed")
-            {
-                FoundCrate::Itself => quote! { crate },
-                FoundCrate::Name(crate_name) => {
-                    let crate_name_ident = format_ident!("{}", crate_name);
-                    quote! { ::#crate_name_ident }
-                }
-            },
-            data_var,
+            data: Vec::new(),
+            patch_ops: Vec::new(),
+            location_map: LocationMap::new(),
             defined_labels: BTreeMap::new(),
             used_labels: BTreeMap::new(),
-            loc_map_var,
-            patch_ops_var,
             endian_mode: Endianness::Native,
         }
     }
 
-    pub fn report_label_def(&mut self, label: &Lifetime) -> syn::Result<()> {
+    pub fn report_label_def(
+        &mut self,
+        label: &Lifetime,
+        start: usize,
+        end: usize,
+    ) -> syn::Result<()> {
         let label_str = label.ident.to_string();
         match self.defined_labels.entry(label_str) {
-            Entry::Vacant(vacant) => vacant.insert(LabelInfo {
-                source_token: label.clone(),
-            }),
+            Entry::Vacant(vacant) => {
+                vacant.insert(LabelInfo {
+                    source_token: label.clone(),
+                });
+                self.location_map
+                    .insert(label.ident.to_string(), support::DataRange::new(start, end));
+            }
             Entry::Occupied(occ) => {
                 let mut err1 = syn::Error::new_spanned(label, "Duplicate label");
                 err1.combine(syn::Error::new_spanned(
@@ -67,21 +71,9 @@ impl EntryState {
 
     pub fn report_label_use(&mut self, label: &Lifetime) {
         let label_str = label.ident.to_string();
-        self.used_labels.entry(label_str).or_insert(LabelInfo {
+        self.used_labels.entry(label_str).or_insert(LabelRef {
             source_token: label.clone(),
         });
-    }
-
-    pub fn data_var(&self) -> &Ident {
-        &self.data_var
-    }
-
-    pub fn loc_map_var(&self) -> &Ident {
-        &self.loc_map_var
-    }
-
-    pub fn patch_ops_var(&self) -> &Ident {
-        &self.patch_ops_var
     }
 
     pub fn endian_mode(&self) -> Endianness {
@@ -118,28 +110,44 @@ impl EntryState {
         }
     }
 
-    pub fn generate_expr(&self, statements: TokenStream) -> TokenStream {
-        let data_var = &self.data_var;
-        let loc_map_var = &self.loc_map_var;
-        let patch_ops_var = &self.patch_ops_var;
-        let crate_name = &self.crate_name;
-        quote! {
-            {
-                let mut #data_var: Vec<u8> = Vec::new();
-                let mut #loc_map_var = #crate_name::support::LocationMap::new();
-                let mut #patch_ops_var: Vec<#crate_name::support::PatchOp> = Vec::new();
-                {#statements}
-                {
-                    for op in #patch_ops_var {
-                        op.apply(&#loc_map_var, &mut #data_var);
-                    }
-                }
-                #data_var
-            }
+    pub fn generate_expr(&mut self) -> syn::Result<TokenStream> {
+        // Apply all deferred patch operations
+        for patch_op in self.patch_ops.drain(..) {
+            patch_op.apply(&self.location_map, &mut self.data)?;
         }
+        let byte_array = self
+            .data
+            .iter()
+            .map(|b| syn::LitByte::new(*b, Span::call_site()));
+        Ok(quote! {{
+            let __slice: &'static [u8] = &[
+                #(#byte_array),*
+            ];
+            __slice
+        }})
     }
 
-    pub fn crate_name(&self) -> &TokenStream {
-        &self.crate_name
+    pub fn append_bytes(&mut self, bytes: &[u8]) {
+        self.data.extend_from_slice(bytes);
     }
+
+    pub fn advance_bytes(&mut self, n: usize) {
+        let start = self.data.len();
+        self.data.resize(start + n, 0);
+    }
+
+    pub fn curr_offset(&self) -> usize {
+        self.data.len()
+    }
+
+    pub fn defer_patch_op<F>(&mut self, f: F)
+    where
+        F: FnOnce(&LocationMap, &mut [u8]) -> syn::Result<()> + 'static,
+    {
+        self.patch_ops.push(PatchOp::new(f));
+    }
+}
+
+pub trait StateOperation {
+    fn apply_to(&self, state: &mut EntryState) -> syn::Result<()>;
 }

@@ -20,11 +20,13 @@ impl DataRange {
         self.start
     }
 
+    #[expect(dead_code, reason = "Will shortly be implementing end()")]
     #[must_use]
     pub fn end(&self) -> usize {
         self.end
     }
 
+    #[expect(dead_code, reason = "Will shortly be implementing end()")]
     #[must_use]
     pub fn size(&self) -> usize {
         self.end - self.start
@@ -48,12 +50,6 @@ impl LocationMap {
     pub fn get(&self, label: &str) -> Option<DataRange> {
         self.0.get(label).copied()
     }
-
-    #[must_use]
-    pub fn get_or_panic(&self, label: &str) -> DataRange {
-        self.get(label)
-            .unwrap_or_else(|| panic!("Label '{label}' not found in LocationMap"))
-    }
 }
 
 impl Default for LocationMap {
@@ -62,7 +58,7 @@ impl Default for LocationMap {
     }
 }
 
-type RawPatchOp = Box<dyn FnOnce(&LocationMap, &mut [u8])>;
+type RawPatchOp = Box<dyn FnOnce(&LocationMap, &mut [u8]) -> syn::Result<()>>;
 
 pub struct PatchOp(RawPatchOp);
 
@@ -70,12 +66,12 @@ impl PatchOp {
     #[must_use]
     pub fn new<F>(f: F) -> Self
     where
-        F: FnOnce(&LocationMap, &mut [u8]) + 'static,
+        F: FnOnce(&LocationMap, &mut [u8]) -> syn::Result<()> + 'static,
     {
         Self(Box::new(f))
     }
 
-    pub fn apply(self, location_map: &LocationMap, data: &mut [u8]) {
-        (self.0)(location_map, data);
+    pub fn apply(self, location_map: &LocationMap, data: &mut [u8]) -> syn::Result<()> {
+        (self.0)(location_map, data)
     }
 }

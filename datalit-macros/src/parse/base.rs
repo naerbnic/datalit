@@ -7,6 +7,7 @@ use syn::{Ident, parse::ParseStream};
 
 use crate::to_bytes::{Endianness, IntType};
 
+#[derive(Debug, Clone)]
 pub struct PrimitiveSpec {
     ident: Ident,
     int_type: IntType,
@@ -18,8 +19,15 @@ impl PrimitiveSpec {
         self.int_type
     }
 
-    pub fn endianness(&self) -> Option<Endianness> {
-        self.endianness
+    pub fn write_int(
+        &self,
+        default_endianness: Endianness,
+        n: &num::BigInt,
+        buffer: &mut [u8],
+    ) -> syn::Result<()> {
+        let int_type = self.int_type();
+        let endianness = self.endianness.unwrap_or(default_endianness);
+        int_type.write_bytes_from_bigint(n, endianness, buffer)
     }
 }
 

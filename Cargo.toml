@@ -8,5 +8,5 @@ version = "0.1.0-alpha.1"
 license = "MIT OR Apache-2.0"
 
 [workspace.dependencies]
-datalit-macros = { path = "datalit-macros" }
-datalit-macros-internals = { path = "datalit-macros-internals" }
+datalit-macros = { version = "0.1.0-alpha.1", path = "datalit-macros" }
+datalit-macros-internals = { version = "0.1.0-alpha.1", path = "datalit-macros-internals" }

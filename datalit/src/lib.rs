@@ -1,6 +1,3 @@
-#[doc(hidden)]
-pub mod support;
-
 pub use datalit_macros::datalit;
 
 #[cfg(test)]

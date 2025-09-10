@@ -79,4 +79,36 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn supports_len() {
+        assert_eq!(
+            datalit!(
+                'data: {
+                    1u8,
+                    12u16,
+                },
+                len('data): u8,
+            ),
+            &*vec![1u8, 12u8, 0u8, 3u8]
+        )
+    }
+
+
+    #[test]
+    fn supports_end() {
+        assert_eq!(
+            datalit!(
+                0xFFFF,
+                'data: {
+                    1u8,
+                    12u16le,
+                },
+                start('data): u8,
+                end('data): u8,
+                len('data): u8,
+            ),
+            &*vec![0xFFu8, 0xFF, 1u8, 12u8, 0u8, 2u8, 5u8, 3u8]
+        )
+    }
 }

@@ -20,13 +20,11 @@ impl DataRange {
         self.start
     }
 
-    #[expect(dead_code, reason = "Will shortly be implementing end()")]
     #[must_use]
     pub fn end(&self) -> usize {
         self.end
     }
 
-    #[expect(dead_code, reason = "Will shortly be implementing end()")]
     #[must_use]
     pub fn size(&self) -> usize {
         self.end - self.start

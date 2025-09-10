@@ -71,26 +71,6 @@ trait ProcessCall {
     fn process(&self, state: &mut EntryState) -> syn::Result<EvalCallBox>;
 }
 
-#[derive(derive_syn_parse::Parse)]
-pub struct StartCall {
-    lifetime: Lifetime,
-    _trailing: Option<syn::Token![,]>,
-}
-
-impl ProcessCall for StartCall {
-    fn process(&self, state: &mut EntryState) -> syn::Result<EvalCallBox> {
-        state.report_label_use(&self.lifetime);
-        let lifetime_span = self.lifetime.span();
-        let name = self.lifetime.ident.to_string();
-        Ok(EvalCallBox::new(move |location_map: &LocationMap| {
-            let range = location_map.get(&name).ok_or_else(|| {
-                Error::new(lifetime_span, format!("Label '{}' not defined", name))
-            })?;
-            Ok(range.start().into())
-        }))
-    }
-}
-
 struct FunctionExpr {
     name: Ident,
     args: Paren,
@@ -111,6 +91,8 @@ impl Parse for FunctionExpr {
         let args: Paren = syn::parenthesized!(arg_content in args);
         let func = match name.to_string().as_str() {
             "start" => FunctionCall::Start(StartCall::parse(&arg_content)?),
+            "end" => FunctionCall::End(EndCall::parse(&arg_content)?),
+            "len" => FunctionCall::Len(LenCall::parse(&arg_content)?),
             _ => {
                 return Err(Error::new_spanned(
                     &name,
@@ -130,12 +112,76 @@ impl ProcessCall for FunctionExpr {
 
 enum FunctionCall {
     Start(StartCall),
+    End(EndCall),
+    Len(LenCall),
 }
 
 impl ProcessCall for FunctionCall {
     fn process(&self, state: &mut EntryState) -> syn::Result<EvalCallBox> {
         match self {
             FunctionCall::Start(start_call) => start_call.process(state),
+            FunctionCall::End(end_call) => end_call.process(state),
+            FunctionCall::Len(len_call) => len_call.process(state),
         }
+    }
+}
+
+#[derive(derive_syn_parse::Parse)]
+pub struct StartCall {
+    lifetime: Lifetime,
+    _trailing: Option<syn::Token![,]>,
+}
+
+impl ProcessCall for StartCall {
+    fn process(&self, state: &mut EntryState) -> syn::Result<EvalCallBox> {
+        state.report_label_use(&self.lifetime);
+        let lifetime_span = self.lifetime.span();
+        let name = self.lifetime.ident.to_string();
+        Ok(EvalCallBox::new(move |location_map: &LocationMap| {
+            let range = location_map.get(&name).ok_or_else(|| {
+                Error::new(lifetime_span, format!("Label '{}' not defined", name))
+            })?;
+            Ok(range.start().into())
+        }))
+    }
+}
+
+#[derive(derive_syn_parse::Parse)]
+pub struct EndCall {
+    lifetime: Lifetime,
+    _trailing: Option<syn::Token![,]>,
+}
+
+impl ProcessCall for EndCall {
+    fn process(&self, state: &mut EntryState) -> syn::Result<EvalCallBox> {
+        state.report_label_use(&self.lifetime);
+        let lifetime_span = self.lifetime.span();
+        let name = self.lifetime.ident.to_string();
+        Ok(EvalCallBox::new(move |location_map: &LocationMap| {
+            let range = location_map.get(&name).ok_or_else(|| {
+                Error::new(lifetime_span, format!("Label '{}' not defined", name))
+            })?;
+            Ok(range.end().into())
+        }))
+    }
+}
+
+#[derive(derive_syn_parse::Parse)]
+pub struct LenCall {
+    lifetime: Lifetime,
+    _trailing: Option<syn::Token![,]>,
+}
+
+impl ProcessCall for LenCall {
+    fn process(&self, state: &mut EntryState) -> syn::Result<EvalCallBox> {
+        state.report_label_use(&self.lifetime);
+        let lifetime_span = self.lifetime.span();
+        let name = self.lifetime.ident.to_string();
+        Ok(EvalCallBox::new(move |location_map: &LocationMap| {
+            let range = location_map.get(&name).ok_or_else(|| {
+                Error::new(lifetime_span, format!("Label '{}' not defined", name))
+            })?;
+            Ok(range.size().into())
+        }))
     }
 }

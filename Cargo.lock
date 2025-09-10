@@ -10,14 +10,14 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
 name = "datalit"
-version = "0.1.0-prerelease"
+version = "0.1.0-alpha.1"
 dependencies = [
  "datalit-macros",
 ]
 
 [[package]]
 name = "datalit-macros"
-version = "0.1.0-prerelease"
+version = "0.1.0-alpha.1"
 dependencies = [
  "datalit-macros-internals",
  "proc-macro2",
@@ -25,7 +25,7 @@ dependencies = [
 
 [[package]]
 name = "datalit-macros-internals"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "derive-syn-parse",
  "enum_dispatch",

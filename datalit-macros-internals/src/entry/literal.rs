@@ -18,8 +18,10 @@ where
     // This should be a valid hex string, which should be in ascii.
     // We can use the byte length to determine how many chars were used.
     // We need an even number of hex digits to form bytes.
-    assert!(8usize.is_multiple_of(digits_per_byte),
-        "digits_per_byte must divide 8 evenly to unambiguously form bytes");
+    assert!(
+        8usize.is_multiple_of(digits_per_byte),
+        "digits_per_byte must divide 8 evenly to unambiguously form bytes"
+    );
     if !digits.len().is_multiple_of(digits_per_byte) {
         return Err(Error::new_spanned(
             err_context,

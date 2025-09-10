@@ -32,6 +32,6 @@ pub fn generate_expr(input: TokenStream) -> syn::Result<TokenStream> {
 pub fn generate_expr_raw(input: TokenStream) -> TokenStream {
     generate_expr(input).unwrap_or_else(|e| {
         let errors = e.into_iter().map(syn::Error::into_compile_error);
-        quote!{{#(#errors);*}}
+        quote! {{#(#errors);*}}
     })
 }

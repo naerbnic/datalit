@@ -94,7 +94,6 @@ mod tests {
         )
     }
 
-
     #[test]
     fn supports_end() {
         assert_eq!(

@@ -2,7 +2,11 @@
 resolver = "3"
 members = ["datalit", "datalit-macros", "datalit-macros-internals"]
 
-[workspace.metadata]
-# Licensing
+[workspace.package]
+edition = "2024"
+version = "0.1.0-alpha.1"
 license = "MIT OR Apache-2.0"
-license-file = ["LICENSE-MIT", "LICENSE-APACHE"]
+
+[workspace.dependencies]
+datalit-macros = { path = "datalit-macros" }
+datalit-macros-internals = { path = "datalit-macros-internals" }

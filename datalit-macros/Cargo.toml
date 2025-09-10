@@ -1,12 +1,12 @@
 [package]
 name = "datalit-macros"
-version = "0.1.0-alpha.1"
-edition = "2024"
-license = "MIT OR Apache-2.0"
+license.workspace = true
+version.workspace = true
+edition.workspace = true
 
 [lib]
 proc-macro = true
 
 [dependencies]
 proc-macro2 = "1.0.101"
-datalit-macros-internals = { path = "../datalit-macros-internals" }
+datalit-macros-internals = { workspace = true }

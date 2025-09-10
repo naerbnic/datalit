@@ -1,8 +1,8 @@
 [package]
 name = "datalit"
-version = "0.1.0-alpha.1"
-edition = "2024"
-license = "MIT OR Apache-2.0"
+license.workspace = true
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
-datalit-macros = { path = "../datalit-macros" }
+datalit-macros = { workspace = true }

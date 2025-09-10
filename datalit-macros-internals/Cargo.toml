@@ -1,7 +1,8 @@
 [package]
 name = "datalit-macros-internals"
-version = "0.1.0-alpha.1"
-edition = "2024"
+license.workspace = true
+version.workspace = true
+edition.workspace = true
 
 [dependencies]
 derive-syn-parse = "0.2.0"

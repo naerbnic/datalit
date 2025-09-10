@@ -54,4 +54,29 @@ mod tests {
         );
         assert_eq!(bytes, &*vec![0x01u8, 0x03, 0x04, 0x00, 0x00]);
     }
+
+    #[test]
+    fn supports_align() {
+        let bytes = datalit!(
+            1u8,
+            2u8,
+            // Should add 2 bytes of padding
+            align(4),
+            3u8,
+            // Should add 3 bytes of padding
+            align(4),
+            1_000_000u24,
+            // Should add 1 byte of padding
+            align(4),
+            // Realigning to 4 bytes when already aligned should do nothing
+            align(4),
+            5u8
+        );
+        assert_eq!(
+            bytes,
+            &*vec![
+                1u8, 2u8, 0u8, 0u8, 3u8, 0x00, 0x00, 0x00, 64, 66, 15, 0x00, 5u8
+            ]
+        );
+    }
 }

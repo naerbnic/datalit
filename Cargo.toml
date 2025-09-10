@@ -3,6 +3,7 @@ resolver = "3"
 members = [
     "datalit",
     "datalit-macros",
+    "datalit-macros-internals"
 ]
 
 # Licensing

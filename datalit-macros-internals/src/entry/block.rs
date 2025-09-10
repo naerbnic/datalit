@@ -1,6 +1,9 @@
 use syn::token::Brace;
 
-use crate::{SequenceEntry, EntryState, state::StateOperation};
+use crate::{
+    entry::SequenceEntry,
+    state::{EntryState, StateOperation},
+};
 
 #[derive(derive_syn_parse::Parse)]
 pub struct BlockEntry {

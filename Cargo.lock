@@ -19,6 +19,14 @@ dependencies = [
 name = "datalit-macros"
 version = "0.1.0-prerelease"
 dependencies = [
+ "datalit-macros-internals",
+ "proc-macro2",
+]
+
+[[package]]
+name = "datalit-macros-internals"
+version = "0.1.0"
+dependencies = [
  "derive-syn-parse",
  "enum_dispatch",
  "num",

@@ -1,6 +1,9 @@
 use syn::{Error, Ident, parse::ParseStream};
 
-use crate::{EntryState, state::StateOperation, to_bytes::Endianness};
+use crate::{
+    state::{EntryState, StateOperation},
+    to_bytes::Endianness,
+};
 
 #[derive(derive_syn_parse::Parse)]
 pub struct ModeChange {

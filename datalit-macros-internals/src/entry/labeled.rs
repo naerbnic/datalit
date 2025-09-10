@@ -1,6 +1,6 @@
 use syn::{Lifetime, parse::ParseStream};
 
-use crate::{EntryState, state::StateOperation};
+use crate::state::{EntryState, StateOperation};
 
 use super::Entry;
 

@@ -2,8 +2,6 @@ pub mod support;
 
 use std::collections::{BTreeMap, btree_map::Entry};
 
-use proc_macro2::{Span, TokenStream};
-use quote::quote;
 use syn::Lifetime;
 
 use crate::{
@@ -118,21 +116,12 @@ impl EntryState {
         }
     }
 
-    pub fn generate_expr(&mut self) -> syn::Result<TokenStream> {
+    pub fn generate_data(mut self) -> syn::Result<Vec<u8>> {
         // Apply all deferred patch operations
         for patch_op in self.patch_ops.drain(..) {
             patch_op.apply(&self.location_map, &mut self.data)?;
         }
-        let byte_array = self
-            .data
-            .iter()
-            .map(|b| syn::LitByte::new(*b, Span::call_site()));
-        Ok(quote! {{
-            let __slice: &'static [u8] = &[
-                #(#byte_array),*
-            ];
-            __slice
-        }})
+        Ok(self.data)
     }
 
     pub fn append_bytes(&mut self, bytes: &[u8]) {

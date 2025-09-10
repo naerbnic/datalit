@@ -2,8 +2,7 @@ use quote::ToTokens;
 use syn::{Error, LitByte, LitByteStr, LitCStr, LitInt};
 
 use crate::{
-    EntryState,
-    state::StateOperation,
+    state::{EntryState, StateOperation},
     to_bytes::{Endianness, IntType, base10_digits_to_bytes},
 };
 

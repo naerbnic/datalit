@@ -150,6 +150,7 @@ impl EntryState {
 
     pub fn unfreeze_label_context(&mut self) {
         assert!(self.num_frozen_label_contexts > 0);
+        self.num_frozen_label_contexts -= 1;
     }
 }
 

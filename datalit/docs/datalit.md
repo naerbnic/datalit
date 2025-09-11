@@ -317,6 +317,84 @@ len('label)
 
 Returns the length of the labeled entry in bytes (i.e. `end('label) - start('label)`).
 
+# Errors
+
+`datalit!()` has to be sure that the data it generates is unambiguous. To do
+this, we enforce the following rules, aside from ensuring the syntax is correct.
+
+## Typed integers must fit within their type
+
+We do not allow a number to be described with goes outside the representable
+values for the type. This means the following is invalid:
+
+```compile_fail
+# use datalit::datalit;
+# let _ =
+datalit!(512u8)
+# ;
+```
+
+This is also true of expression entries. If the generated value is too large
+to be stored in the target type, the entry will cause a compilation error:
+
+```compile_fail
+# use datalit::datalit;
+# let _ =
+datalit!(
+  start('big_offset): u8,
+  // A "lot" of data
+  [ 0x00; 500 ],
+  'big_offset: 0x77,
+)
+# ;
+```
+
+## Labels cannot be defined more than once
+
+You cannot reuse labels:
+
+```compile_fail
+# use datalit::datalit;
+# let _ =
+datalit!(
+  start('label): u32,
+  'label: 89u8,
+  'label: 44u8,
+)
+# ;
+```
+
+## Referenced labels must exist
+
+You cannot use a label without an associated entry:
+
+```compile_fail
+# use datalit::datalit;
+# let data =
+datalit!(
+  start('label): u32,
+)
+# ;
+```
+
+## Labels are forbidden in arrays
+
+You canot use a label inside an array expression, both simple and compound:
+
+```compile_fail
+# use datalit::datalit;
+# let data =
+datalit!(
+  [{
+    'label: 0xAAAA
+  }; 10]
+)
+# ;
+```
+
+This restriction may be loosened in the future if we create reasonable semantics
+for how array labels should be scoped.
+
 # Guarantees
 
 - **Fully const**: The generated data is entirely produced at compile time, and

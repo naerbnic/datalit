@@ -1,3 +1,5 @@
+A macro to create a byte slice with readably described contents.
+
 The `datalit!()` macro can be used as an expression to turn a fluent
 description of a block of data into a static byte array at compile time. This
 allows you to write readable, well-documented descriptions of structured binary
@@ -47,12 +49,29 @@ let png_data = datalit!(
 );
 ```
 
-## Usage
+# Usage
 
-`datalit!()` can be used in any expression context, and will return a constant
-static byte array.
+`datalit!()` can be used in any expression context:
 
-## Quick Reference
+```rust
+# use datalit::datalit;
+fn parse_buffer(data: &[u8]) {}
+
+#[test]
+fn test_data_parsing() {
+  parse_buffer(datalit!(0xDEADBEEF));
+}
+```
+
+They can also be used in a constant context, such as for defining a
+constant variable:
+
+```rust
+# use datalit::datalit;
+const HEADER: &[u8] = datalit!(0xCAFEBABE);
+```
+
+# Quick Reference
 
 - Typed integers: `u8 u16 u24 u32 u64 u128 i8 i16 i32 i64 i128`
   (add `_le` / `_be` for explicit endianness; otherwise current endian mode / native)
@@ -71,13 +90,13 @@ static byte array.
 - Labels: `'name: entry` (forward refs allowed; duplicate = error)
 - Trailing commas: allowed after any entry list.
 
-## Entries
+# Entries
 
 The contents of `datalit!()` are a sequence of individual entries which define
 data that will be appended in the order provided. The different entry
 types are:
 
-### Untyped hex / binary literals
+## Untyped hex / binary literals
 
 ```rust
 # use datalit::datalit;
@@ -95,7 +114,7 @@ but only whole bytes may be formed. Hex literals must have an even number of
 hex digits; binary literals a multiple of 8 binary digits. Underscores are
 ignored and may appear anywhere between digits.
 
-### Typed integer literals
+## Typed integer literals
 
 ```rust
 # use datalit::datalit;
@@ -122,7 +141,7 @@ bytes). Example:
 );
 ```
 
-### Byte literals
+## Byte literals
 
 ```rust
 # use datalit::datalit;
@@ -133,7 +152,7 @@ datalit!(b'X')
 
 The given byte is appended.
 
-### Byte string literals
+## Byte string literals
 
 ```rust
 # use datalit::datalit;
@@ -144,7 +163,7 @@ datalit!(b"TIFF")
 
 The byte sequence is appended.
 
-### C-string literals
+## C-string literals
 
 ```rust
 # use datalit::datalit;
@@ -157,7 +176,7 @@ These operate similarly to byte strings, but also append a trailing null. An
 intervening null byte will not terminate the string; the remainder of the
 string is appended along with the implicit trailing null byte.
 
-### Entry labels
+## Entry labels
 
 ```rust
 # use datalit::datalit;
@@ -170,7 +189,7 @@ The labeled entry is appended as though it were by itself, but the start and
 end offsets are recorded for expressions (`start`, `end`, `len`). Forward
 references are allowed; redefining a label is an error.
 
-### Blocks
+## Blocks
 
 ```rust
 # use datalit::datalit;
@@ -183,7 +202,7 @@ A block appends its contents in the order provided. This can be
 used for visual grouping. When a block is labeled, the bounds of the label
 span from before the block to after the block.
 
-### Simple arrays
+## Simple arrays
 
 ```rust
 # use datalit::datalit;
@@ -195,7 +214,7 @@ datalit!([ 0u8; 100 ])
 Simple arrays of the form `[ entry; N ]` will repeat the entry exactly `N`
 times. N must be an unsuffixed integer literal (underscores allowed).
 
-### Compound arrays
+## Compound arrays
 
 ```rust
 # use datalit::datalit;
@@ -208,7 +227,7 @@ Repeats its contents like simple arrays, but allows any number of entries
 within the braces. While expressions from within the array can reference
 labels, no labels can be defined inside of the braces.
 
-### Align
+## Align
 
 ```rust
 # use datalit::datalit;
@@ -221,7 +240,7 @@ Aligns the current data offset to the next multiple of the given power-of-two.
 If already aligned, nothing is appended. Padding bytes are `0x00`. A non
 power-of-two argument causes a compile error.
 
-### Mode changes
+## Mode changes
 
 ```rust
 # use datalit::datalit;
@@ -241,7 +260,7 @@ datalit!(
 Mode changes adjust defaults (currently only integer endianness). The initial
 endian mode is native (`ne`). It persists until changed again.
 
-### Expression (preview)
+## Expression (preview)
 
 ```rust
 # use datalit::datalit;
@@ -254,17 +273,17 @@ endian mode is native (`ne`). It persists until changed again.
 Expressions (documented later) compute values from labels (`start`, `end`,
 `len`).
 
-## Entry Sequences
+# Entry Sequences
 
 In both the body of the top-level macro, as well as blocks, entries are
 separated by commas. Commas are required between any two entries. Trailing
 commas are permitted.
 
-## Expressions
+# Expressions
 
 TBW.
 
-## Guarantees
+# Guarantees
 
 - **Fully const**: The generated data is entirely produced at compile time, and
   the resulting values are usable in const contexts.
@@ -273,7 +292,7 @@ TBW.
 - **`nostd` compatible**: The generated array is static, and does not depend on
   an allocator.
 
-## Future work
+# Future work
 
 - Allow for scoped labels, so they can be used in compound arrays.
 - Add basic math operators, so things like relative offsets or the like can be

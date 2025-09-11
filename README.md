@@ -4,9 +4,18 @@
 
 `datalit` is a crate that provides the `datalit!(...)` macro to generate static data described in a fluent style. Features include:
 
-- Compiles to static arrays
-- Endianness aware
-- Fluent description of offset references
+- _Readable_: Multiple ways to express data in an easy to understand way.
+  Choose the one clearest for your use case!
+- _Endian aware_: Working with native data? A file format with a specified
+  endianness? Different endianness needed in different locations? You can
+  declare individual items as being a particular endianness, or declare a
+  default to use.
+- _Cross referenced data_: Need to reference the location of data in a file?
+  You can reference the location without having to count the bytes! References
+  are adjusted automatically even if their locations change. Works with both
+  forward and backward references.
+- _Compile time_: Compiled macros are identical to static byte slices! They can
+  be used in constant and `no_std` environments.
 
 This can be used to make easily readable and maintainable data in tests.
 

@@ -1,4 +1,5 @@
 #![doc(hidden)]
+#![forbid(unsafe_code)]
 
 use proc_macro::TokenStream as BaseTokenStream;
 

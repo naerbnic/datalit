@@ -56,7 +56,7 @@ pub struct InvalidU24Error;
 struct U24(u32);
 
 impl U24 {
-    fn new(value: u32) -> Result<Self, InvalidU24Error> {
+    pub fn new(value: u32) -> Result<Self, InvalidU24Error> {
         if value > 0xFFFFFF {
             return Err(InvalidU24Error);
         }
@@ -95,6 +95,50 @@ impl num::traits::ToBytes for U24 {
     }
 }
 
+struct I24(i32);
+
+impl I24 {
+    const MIN: I24 = I24(-(2i32.pow(23))); // -2^23
+    const MAX: I24 = I24(2i32.pow(23) - 1); // 2^23 - 1
+
+    pub fn new(value: i32) -> Result<Self, InvalidU24Error> {
+        if !(I24::MIN.0..=I24::MAX.0).contains(&value) {
+            return Err(InvalidU24Error);
+        }
+        Ok(I24(value))
+    }
+}
+
+impl FromStr for I24 {
+    type Err = InvalidU24Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value: i32 = s.parse().map_err(|_| InvalidU24Error)?;
+        I24::new(value)
+    }
+}
+
+impl TryFrom<&num::BigInt> for I24 {
+    type Error = InvalidU24Error;
+
+    fn try_from(value: &num::BigInt) -> Result<Self, Self::Error> {
+        let i32_value: i32 = value.to_i32().ok_or(InvalidU24Error)?;
+        I24::new(i32_value)
+    }
+}
+
+impl num::traits::ToBytes for I24 {
+    type Bytes = [u8; 3];
+
+    fn to_be_bytes(&self) -> Self::Bytes {
+        self.0.to_be_bytes()[1..4].try_into().unwrap()
+    }
+
+    fn to_le_bytes(&self) -> Self::Bytes {
+        self.0.to_le_bytes()[0..3].try_into().unwrap()
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum IntType {
     U8,
@@ -105,6 +149,7 @@ pub enum IntType {
     USize,
     I8,
     I16,
+    I24,
     I32,
     I64,
     ISize,
@@ -121,6 +166,7 @@ impl IntType {
             "usize" => Some(IntType::USize),
             "i8" => Some(IntType::I8),
             "i16" => Some(IntType::I16),
+            "i24" => Some(IntType::I24),
             "i32" => Some(IntType::I32),
             "i64" => Some(IntType::I64),
             "isize" => Some(IntType::ISize),
@@ -132,7 +178,7 @@ impl IntType {
         match self {
             IntType::U8 | IntType::I8 => 1,
             IntType::U16 | IntType::I16 => 2,
-            IntType::U24 => 3,
+            IntType::I24 | IntType::U24 => 3,
             IntType::U32 | IntType::I32 => 4,
             IntType::U64 | IntType::I64 => 8,
             IntType::USize | IntType::ISize => std::mem::size_of::<usize>(),
@@ -168,6 +214,7 @@ impl IntType {
             IntType::USize => impl_for!(usize),
             IntType::I8 => impl_for!(i8),
             IntType::I16 => impl_for!(i16),
+            IntType::I24 => impl_for!(I24),
             IntType::I32 => impl_for!(i32),
             IntType::I64 => impl_for!(i64),
             IntType::ISize => impl_for!(isize),
@@ -200,6 +247,7 @@ pub fn base10_digits_to_bytes(
         IntType::USize => parse_int!(usize, digits),
         IntType::I8 => parse_int!(i8, digits),
         IntType::I16 => parse_int!(i16, digits),
+        IntType::I24 => parse_int!(I24, digits),
         IntType::I32 => parse_int!(i32, digits),
         IntType::I64 => parse_int!(i64, digits),
         IntType::ISize => parse_int!(isize, digits),

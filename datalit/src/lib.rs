@@ -156,6 +156,12 @@ mod tests {
         );
     }
 
+    #[test]
+    fn supports_i24() {
+        let bytes = datalit!(0x123456i24_le, -0x123456i24_be);
+        assert_eq!(bytes, &*vec![0x56u8, 0x34, 0x12, 0xED, 0xCB, 0xAA]);
+    }
+
     // Compile test: Can be used in a constant context
     #[allow(dead_code, reason = "Compile test only")]
     const _DATA: &[u8] = datalit!(

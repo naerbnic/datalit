@@ -1,6 +1,4 @@
-//! This is an internal implementation detail of the
-//! [`datalit`](https://docs.rs/datalit) crate. Users should not directly depend on
-//! this crate.
+#![doc(hidden)]
 
 use proc_macro2::{Span, TokenStream};
 

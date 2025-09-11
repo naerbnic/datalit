@@ -1,5 +1,20 @@
-This crate defines the [`datalit!`][`datalit`] procedural macro, which generates
+This crate defines the [`datalit!`] procedural macro, which generates
 static byte slices from a declarative syntax.
+
+# Features
+
+- _Readable_: Multiple ways to express data in an easy to understand way.
+  Choose the one clearest for your use case!
+- _Endian aware_: Working with native data? A file format with a specified
+  endianness? Different endianness needed in different locations? You can
+  declare individual items as being a particular endianness, or declare a
+  default to use.
+- _Cross referenced data_: Need to reference the location of data in a file?
+  You can reference the location without having to count the bytes! References
+  are adjusted automatically even if their locations change. Works with both
+  forward and backward references.
+- _Compile time_: Compiled macros are identical to static byte slices! They can
+  be used in constant and `no_std` environments.
 
 # Example
 
@@ -44,4 +59,4 @@ let png_data = datalit!(
 );
 ```
 
-See the [`datalit!`][`datalit`] macro definition for more details.
+See the [`datalit!`] macro definition for more details.

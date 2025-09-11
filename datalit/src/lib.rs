@@ -1,3 +1,4 @@
+#![doc = include_str!("../docs/lib.md")]
 
 #[doc = include_str!("../docs/datalit.md")]
 pub use datalit_macros::datalit;

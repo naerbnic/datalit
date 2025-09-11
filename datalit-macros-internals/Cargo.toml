@@ -1,10 +1,12 @@
 [package]
 name = "datalit-macros-internals"
+description = "Internals for the datalit crate"
 license.workspace = true
 version.workspace = true
 edition.workspace = true
 repository.workspace = true
 documentation.workspace = true
+rust-version.workspace = true
 
 [dependencies]
 derive-syn-parse = "0.2.0"

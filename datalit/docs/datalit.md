@@ -101,8 +101,8 @@ ignored and may appear anywhere between digits.
 # use datalit::datalit;
 # let data =
 datalit!(
-  12u32le,
-  14u32be,
+  12u32_le,
+  14u32_be,
 )
 # ;
 ```

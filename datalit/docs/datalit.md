@@ -42,7 +42,7 @@ const HEADER: &[u8] = datalit!(0xCAFEBABE);
   (no labels inside compound body)
 - Align: `align(8)` (power of two; fills with `0x00`)
 - Mode change: `@endian = le | be | ne` (default native `ne`; this sets the
-   current endian mode)
+  current endian mode)
 - Expressions: `start('lbl) end('lbl) len('lbl)`
   (typed target example: `len('lbl): u32_be`)
 - Labels: `'name: entry` (forward refs allowed; duplicate = error)

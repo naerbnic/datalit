@@ -1,5 +1,14 @@
 [package]
 name = "datalit"
+description = "A zero-runtime fluent data description macro"
+keywords = ["macro", "no_std", "serialization", "test", "encoding"]
+categories = [
+  "development-tools::testing",
+  "encoding",
+  "no-std::no-alloc",
+  "rust-patterns",
+]
+authors = ["Brian Chin <brian.chin@gmail.com>"]
 license.workspace = true
 version.workspace = true
 edition.workspace = true

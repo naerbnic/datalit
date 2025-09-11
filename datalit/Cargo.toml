@@ -8,12 +8,12 @@ categories = [
   "no-std::no-alloc",
   "rust-patterns",
 ]
-authors = ["Brian Chin <brian.chin@gmail.com>"]
-documentation = "https://docs.rs/datalit"
 readme = "../README.md"
 license.workspace = true
 version.workspace = true
 edition.workspace = true
+repository.workspace = true
+documentation.workspace = true
 
 [dependencies]
 datalit-macros = { workspace = true }

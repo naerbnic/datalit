@@ -3,6 +3,8 @@ name = "datalit-macros"
 license.workspace = true
 version.workspace = true
 edition.workspace = true
+repository.workspace = true
+documentation.workspace = true
 
 [lib]
 proc-macro = true

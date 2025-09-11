@@ -3,6 +3,8 @@ name = "datalit-macros-internals"
 license.workspace = true
 version.workspace = true
 edition.workspace = true
+repository.workspace = true
+documentation.workspace = true
 
 [dependencies]
 derive-syn-parse = "0.2.0"

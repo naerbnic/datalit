@@ -107,7 +107,7 @@ datalit!(
 # ;
 ```
 
-These are integer literals written in the specified endianness or the current
+These are integer literals appended in the specified endianness or the current
 endian mode. If the suffix ends with `le` / `be` (with an optional `_` prefix)
 that endianness is used; otherwise the current endian mode (`@endian`) applies
 (default native). All
@@ -131,7 +131,7 @@ datalit!(b'X')
 # ;
 ```
 
-The given byte is written in the data directly.
+The given byte is appended.
 
 ### Byte string literals
 
@@ -142,7 +142,7 @@ datalit!(b"TIFF")
 # ;
 ```
 
-The byte sequence is written in the data directly.
+The byte sequence is appended.
 
 ### C-string literals
 
@@ -154,8 +154,8 @@ datalit!(c"Hello, world!\n")
 ```
 
 These operate similarly to byte strings, but also append a trailing null. An
-intervening null byte will not terminate the string, and
-the rest of the string will be appended along with the implicit null byte.
+intervening null byte will not terminate the string; the remainder of the
+string is appended along with the implicit trailing null byte.
 
 ### Entry labels
 
@@ -218,8 +218,8 @@ datalit!(0xAA, align(4))
 ```
 
 Aligns the current data offset to the next multiple of the given power-of-two.
-If already aligned, nothing is added. Padding bytes are `0x00`. A non power-of-
-two argument causes a compile error.
+If already aligned, nothing is appended. Padding bytes are `0x00`. A non
+power-of-two argument causes a compile error.
 
 ### Mode changes
 

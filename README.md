@@ -67,7 +67,7 @@ let data = datalit!(
   end('payload): u16_le,
   len('payload): u16_le,
 
-  // Simple repetition & compound arrays.
+  // Simple & compound arrays.
   [ 0xFF; 4 ],
   [{ 0xAA, 0xBB }; 2],
 );

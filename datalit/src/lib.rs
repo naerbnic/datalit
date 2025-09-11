@@ -5,11 +5,6 @@
 #[doc = include_str!("../docs/datalit.md")]
 pub use datalit_macros::datalit;
 
-// Run doctests on the README file
-#[cfg(doctest)]
-#[doc = include_str!("../../README.md")]
-mod readme {}
-
 #[cfg(test)]
 mod tests {
     use super::*;

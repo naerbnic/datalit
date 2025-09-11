@@ -1,10 +1,32 @@
 A macro to create a byte slice with readably described contents.
 
 The `datalit!()` macro can be used as an expression to turn a fluent
-description of a block of data into a static byte array at compile time. This
+description of a block of data into a byte slice at compile time. This
 allows you to write readable, well-documented descriptions of structured binary
 data while incurring no runtime cost. This is particularly useful in tests and
 examples for code that performs low-level parsing or binary protocol handling.
+
+# Usage
+
+`datalit!()` can be used in any expression context:
+
+```rust
+# use datalit::datalit;
+fn parse_buffer(data: &[u8]) {}
+
+#[test]
+fn test_data_parsing() {
+  parse_buffer(datalit!(0xDEADBEEF));
+}
+```
+
+They can also be used in a constant context, such as for defining a
+constant variable:
+
+```rust
+# use datalit::datalit;
+const HEADER: &[u8] = datalit!(0xCAFEBABE);
+```
 
 # Example
 
@@ -49,28 +71,6 @@ let png_data = datalit!(
 );
 ```
 
-# Usage
-
-`datalit!()` can be used in any expression context:
-
-```rust
-# use datalit::datalit;
-fn parse_buffer(data: &[u8]) {}
-
-#[test]
-fn test_data_parsing() {
-  parse_buffer(datalit!(0xDEADBEEF));
-}
-```
-
-They can also be used in a constant context, such as for defining a
-constant variable:
-
-```rust
-# use datalit::datalit;
-const HEADER: &[u8] = datalit!(0xCAFEBABE);
-```
-
 # Quick Reference
 
 - Typed integers: `u8 u16 u24 u32 u64 u128 i8 i16 i32 i64 i128`
@@ -85,16 +85,15 @@ const HEADER: &[u8] = datalit!(0xCAFEBABE);
 - Align: `align(8)` (power of two; fills with `0x00`)
 - Mode change: `@endian = le | be | ne` (default native `ne`; this sets the
    current endian mode)
-- Expressions (preview): `start('lbl) end('lbl) len('lbl)`
+- Expressions: `start('lbl) end('lbl) len('lbl)`
   (typed target example: `len('lbl): u32_be`)
 - Labels: `'name: entry` (forward refs allowed; duplicate = error)
 - Trailing commas: allowed after any entry list.
 
 # Entries
 
-The contents of `datalit!()` are a sequence of individual entries which define
-data that will be appended in the order provided. The different entry
-types are:
+The contents of `datalit!()` are a sequence of individual entries appended in
+order. The different entry types are:
 
 ## Untyped hex / binary literals
 
@@ -137,7 +136,7 @@ bytes). Example:
 # use datalit::datalit;
 # let _ = datalit!(
   1u16_le, 1u16_be,
-  0x01_02_03u24be, 0x01_02_03u24le,
+  0x01_02_03u24_be, 0x01_02_03u24_le,
 );
 ```
 
@@ -236,9 +235,9 @@ datalit!(0xAA, align(4))
 # ;
 ```
 
-Aligns the current data offset to the next multiple of the given power-of-two.
+Aligns the current data offset to the next multiple of the given power of two.
 If already aligned, nothing is appended. Padding bytes are `0x00`. A non
-power-of-two argument causes a compile error.
+power of two argument causes a compile error.
 
 ## Mode changes
 
@@ -267,14 +266,14 @@ endian mode is native (`ne`). It persists until changed again.
 # let _ =
 datalit!(
   start('label): u32,
-  'label: 0u8
+  'label: 0xFEEDF035,
 )
 # ;
 ```
 
-Expressions are used to generate values to append. Expressions entries must
-declare their output type to be able to predict how many bytes the data will
-create, and how to format it after it is evaluated.
+Expression entries append values computed from an expression. Expressions
+entries must declare their output type to be able to predict how many bytes the
+data will create, and how to format it after it is evaluated.
 
 If an expression creates a value that is not representable by the given type,
 it will generate a compilation error.
@@ -300,22 +299,22 @@ start('label)
 Returns the unsigned byte offset of the start of the labeled entry from the
 beginning of the returned byte array.
 
-## End Offset
+## End offset
 
 ```ignore
 end('label)
 ```
 
-Returns the unsigned byte offset of the start of the labeled entry from the
+Returns the unsigned byte offset of the end of the labeled entry from the
 beginning of the returned byte array.
 
-## Entry Length
+## Entry length
 
 ```ignore
 len('label)
 ```
 
-Returns the length of the labeled entry in bytes
+Returns the length of the labeled entry in bytes (i.e. `end('label) - start('label)`)
 
 # Guarantees
 
@@ -323,7 +322,7 @@ Returns the length of the labeled entry in bytes
   the resulting values are usable in const contexts.
 - **Deterministic**: The generation process ensures that the generated data is
   identical from run to run.
-- **`nostd` compatible**: The generated array is static, and does not depend on
+- **`no_std` compatible**: The generated array is static, and does not depend on
   an allocator.
 
 # Future work

@@ -22,7 +22,7 @@ impl ModeChange {
 impl StateOperation for ModeChange {
     fn apply_to(&self, state: &mut EntryState) -> syn::Result<()> {
         let mode_str = self.mode.to_string();
-        if mode_str != "endian_mode" {
+        if mode_str != "endian" {
             return Err(Error::new_spanned(
                 &self.mode,
                 format!("Unknown mode: '{}'", mode_str),

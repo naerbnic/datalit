@@ -33,10 +33,10 @@ mod tests {
     #[test]
     fn supports_mode_change() {
         let bytes = datalit!(
-            @endian_mode = le,
+            @endian = le,
             // Unspecified endianness uses current mode (little-endian)
             1u16,
-            @endian_mode = be,
+            @endian = be,
             // Unspecified endianness uses current mode (little-endian)
             1u16,
             // Specified endianness overrides current mode
@@ -48,7 +48,7 @@ mod tests {
     #[test]
     fn supports_forward_refs() {
         let bytes = datalit!(
-            @endian_mode = le,
+            @endian = le,
             1u8,
             3u8,
             start('next): u16,
@@ -148,7 +148,7 @@ mod tests {
     #[ignore = "syn panics on invalid byte literal"]
     fn test_datalit_macro() {
         datalit!(
-            @endian_mode = le,
+            @endian = le,
             // It appears that when syn tries to parse an invalid byte literal,
             // it will panic instead of returning a parse error.
             // b'CAFEBABE',

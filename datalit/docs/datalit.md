@@ -260,18 +260,26 @@ datalit!(
 Mode changes adjust defaults (currently only integer endianness). The initial
 endian mode is native (`ne`). It persists until changed again.
 
-## Expression (preview)
+## Expression
 
 ```rust
 # use datalit::datalit;
-# let _ = datalit!(
-  len('payload): u32_be,
-  'payload: b"buffalo",
-);
+# let _ =
+datalit!(
+  start('label): u32,
+  'label: 0u8
+)
+# ;
 ```
 
-Expressions (documented later) compute values from labels (`start`, `end`,
-`len`).
+Expressions are used to generate values to append. Expressions entries must
+declare their output type to be able to predict how many bytes the data will
+create, and how to format it after it is evaluated.
+
+If an expression creates a value that is not representable by the given type,
+it will generate a compilation error.
+
+For the different expressions available, see the Expressions section below.
 
 # Entry Sequences
 
@@ -281,7 +289,33 @@ commas are permitted.
 
 # Expressions
 
-TBW.
+These are the currently available expressions:
+
+## Start offset
+
+```ignore
+start('label)
+```
+
+Returns the unsigned byte offset of the start of the labeled entry from the
+beginning of the returned byte array.
+
+## End Offset
+
+```ignore
+end('label)
+```
+
+Returns the unsigned byte offset of the start of the labeled entry from the
+beginning of the returned byte array.
+
+## Entry Length
+
+```ignore
+len('label)
+```
+
+Returns the length of the labeled entry in bytes
 
 # Guarantees
 

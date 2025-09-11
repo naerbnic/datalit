@@ -161,12 +161,13 @@ mod tests {
     #[test]
     fn supports_i24() {
         let bytes = datalit!(0x123456i24_le, -0x123456i24_be, -1i24_be);
-        assert_eq!(bytes, &[0x56u8, 0x34, 0x12, 0xED, 0xCB, 0xAA, 0xFF, 0xFF, 0xFF]);
+        assert_eq!(
+            bytes,
+            &[0x56u8, 0x34, 0x12, 0xED, 0xCB, 0xAA, 0xFF, 0xFF, 0xFF],
+        );
     }
 
     // Compile test: Can be used in a constant context
     #[allow(dead_code, reason = "Compile test only")]
-    const _DATA: &[u8] = datalit!(
-        0xDE, 0xAD, 0xBE, 0xEF,
-    );
+    const _DATA: &[u8] = datalit!(0xDE, 0xAD, 0xBE, 0xEF);
 }

@@ -1,8 +1,8 @@
 The `datalit!()` macro can be used as an expression to turn a fluent
 description of a block of data into a static byte array at compile time. This
-allows you to write readable, well‑documented descriptions of structured binary
+allows you to write readable, well-documented descriptions of structured binary
 data while incurring no runtime cost. This is particularly useful in tests and
-examples for code that performs low‑level parsing or binary protocol handling.
+examples for code that performs low-level parsing or binary protocol handling.
 
 # Example
 
@@ -19,7 +19,7 @@ let png_data = datalit!(
 
   // PNG Chunk:
 
-  // Data length is big endian u32.
+  // Data length is big-endian u32.
   //
   // This is resolved from the length in bytes from the upcoming chunk.
   len('chunk1): u32_be,
@@ -55,16 +55,17 @@ static byte array.
 ## Quick Reference
 
 - Typed integers: `u8 u16 u24 u32 u64 u128 i8 i16 i32 i64 i128`
-  (add `_le` / `_be` for explicit endianness; otherwise current / native)
+  (add `_le` / `_be` for explicit endianness; otherwise current endian mode / native)
 - Untyped hex / binary: `0xABDE`, `0b0010_1111` (must form whole bytes;
   underscores ignored)
-- Byte / byte string / C‑string: `b'R'`, `b"buffalo"`, `c"foo"`
-  (C‑string appends trailing `\0`)
+- Byte / byte string / C-string: `b'R'`, `b"buffalo"`, `c"foo"`
+  (C-string appends trailing `\0`)
 - Blocks: `{ ... }` (may be labeled; label spans entire block)
 - Arrays: simple `[ entry ; N ]`, compound `[{ e1, e2 }; N]`
   (no labels inside compound body)
 - Align: `align(8)` (power of two; fills with `0x00`)
-- Mode change: `@endian = le | be | ne` (default native `ne`)
+- Mode change: `@endian = le | be | ne` (default native `ne`; this sets the
+   current endian mode)
 - Expressions (preview): `start('lbl) end('lbl) len('lbl)`
   (typed target example: `len('lbl): u32_be`)
 - Labels: `'name: entry` (forward refs allowed; duplicate = error)
@@ -106,10 +107,11 @@ datalit!(
 # ;
 ```
 
-These are integer literals written in the specified or current endianness. If
-the suffix ends with `le` / `be` (with an optional `_` prefix) that endianness
-is used; otherwise the current mode (`@endian`) applies (default native). All
-primitive integer widths are supported plus the non‑standard `u24` (three
+These are integer literals written in the specified endianness or the current
+endian mode. If the suffix ends with `le` / `be` (with an optional `_` prefix)
+that endianness is used; otherwise the current endian mode (`@endian`) applies
+(default native). All
+primitive integer widths are supported plus the non-standard `u24` (three
 bytes). Example:
 
 ```rust
@@ -215,8 +217,8 @@ datalit!(0xAA, align(4))
 # ;
 ```
 
-Aligns the current data offset to the next multiple of the given power‑of‑two.
-If already aligned, nothing is added. Padding bytes are `0x00`. A non power‑of‑
+Aligns the current data offset to the next multiple of the given power-of-two.
+If already aligned, nothing is added. Padding bytes are `0x00`. A non power-of-
 two argument causes a compile error.
 
 ### Mode changes
@@ -237,7 +239,7 @@ datalit!(
 ```
 
 Mode changes adjust defaults (currently only integer endianness). The initial
-mode is native (`ne`). It persists until changed again.
+endian mode is native (`ne`). It persists until changed again.
 
 ### Expression (preview)
 

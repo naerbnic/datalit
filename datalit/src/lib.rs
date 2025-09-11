@@ -154,4 +154,10 @@ mod tests {
             // b'CAFEBABE',
         );
     }
+
+    // Compile test: Can be used in a constant context
+    #[allow(dead_code, reason = "Compile test only")]
+    const _DATA: &[u8] = datalit!(
+        0xDE, 0xAD, 0xBE, 0xEF,
+    );
 }

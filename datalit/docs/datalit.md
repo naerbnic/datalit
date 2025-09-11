@@ -1,8 +1,8 @@
 The `datalit!()` macro can be used as an expression to turn a fluent
 description of a block of data into a static byte array at compile time. This
-allows you to write readable, well documented descriptions of structured binary
-data while incurring no runtime cost. This can frequently be useful in testing
-code that does low-level data processing and parsing, among other things.
+allows you to write readable, well‑documented descriptions of structured binary
+data while incurring no runtime cost. This is particularly useful in tests and
+examples for code that performs low‑level parsing or binary protocol handling.
 
 # Example
 
@@ -47,28 +47,28 @@ let png_data = datalit!(
 );
 ```
 
+## Usage
+
+`datalit!()` can be used in any expression context, and will return a constant
+static byte array.
+
 ## Quick Reference
 
-- Integer Types
-  - Unsigned Types: `u8`, `u24`
-  - Signed Types: `i8`, `i64`
-  - Endianness: `u16_le`,
-- Entries
-  - Literals
-    - Untyped hex/binary: `0xABDE`, `0b0010_1111`
-    - Typed int: `123u32`
-    - Byte: `b'R'`
-    - Byte string: `b"buffalo"`
-    - C-string: `c"foo"`
-  - Blocks: `{ ... }`
-  - Simple Arrays: `[ 0x00; 10 ]`
-  - Compound Arrays: `[{ ... }; 5]`
-  - Aligns: `align(8)`
-  - Mode Change: `@endian = be`
-  - Expressions: `start('data): u16`
-- Expressions:
-  - Start/End: `start('data)`/`end('data)`
-  - Length: `len('data)`
+- Typed integers: `u8 u16 u24 u32 u64 u128 i8 i16 i32 i64 i128`
+  (add `_le` / `_be` for explicit endianness; otherwise current / native)
+- Untyped hex / binary: `0xABDE`, `0b0010_1111` (must form whole bytes;
+  underscores ignored)
+- Byte / byte string / C‑string: `b'R'`, `b"buffalo"`, `c"foo"`
+  (C‑string appends trailing `\0`)
+- Blocks: `{ ... }` (may be labeled; label spans entire block)
+- Arrays: simple `[ entry ; N ]`, compound `[{ e1, e2 }; N]`
+  (no labels inside compound body)
+- Align: `align(8)` (power of two; fills with `0x00`)
+- Mode change: `@endian = le | be | ne` (default native `ne`)
+- Expressions (preview): `start('lbl) end('lbl) len('lbl)`
+  (typed target example: `len('lbl): u32_be`)
+- Labels: `'name: entry` (forward refs allowed; duplicate = error)
+- Trailing commas: allowed after any entry list.
 
 ## Entries
 
@@ -76,7 +76,7 @@ The contents of `datalit!()` are a sequence of individual entries which define
 data that will be appended in the order provided. The different entry
 types are:
 
-### Untyped hex/binary literals
+### Untyped hex / binary literals
 
 ```rust
 # use datalit::datalit;
@@ -89,12 +89,10 @@ datalit!(
 # ;
 ```
 
-These append the exact bytes provided, as read from left to right. These
-have no maximum length even if the data is larger than a
-machine-representable number, but only full bytes can be specified. For hex
-literals, there must be an even number of
-digits. For binary literals, the number of digits must be divisible by 8.
-Digits may be arbitrarily separated by underscores.
+These append the exact bytes provided (no runtime parsing). Length is unbounded
+but only whole bytes may be formed. Hex literals must have an even number of
+hex digits; binary literals a multiple of 8 binary digits. Underscores are
+ignored and may appear anywhere between digits.
 
 ### Typed integer literals
 
@@ -108,11 +106,19 @@ datalit!(
 # ;
 ```
 
-These are integer literals that will be written at the current location in
-the byte order specified in the annotated type, or the current endian mode
-if the endianness is not specified. The type must be provided. All native
-rust types are supported, both signed and unsigned variants. In addition,
-we support the `u24` suffix to represent a 3-byte integer as well.
+These are integer literals written in the specified or current endianness. If
+the suffix ends with `le` / `be` (with an optional `_` prefix) that endianness
+is used; otherwise the current mode (`@endian`) applies (default native). All
+primitive integer widths are supported plus the non‑standard `u24` (three
+bytes). Example:
+
+```rust
+# use datalit::datalit;
+# let _ = datalit!(
+  1u16_le, 1u16_be,
+  0x01_02_03u24be, 0x01_02_03u24le,
+);
+```
 
 ### Byte literals
 
@@ -158,9 +164,9 @@ datalit!('data: b"some data")
 # ;
 ```
 
-The labeled entry is appended as through it were by itself, but the bounds of
-the appended data are recorded for use in other expressions. See the
-expressions section for more information.
+The labeled entry is appended as though it were by itself, but the start and
+end offsets are recorded for expressions (`start`, `end`, `len`). Forward
+references are allowed; redefining a label is an error.
 
 ### Blocks
 
@@ -205,51 +211,46 @@ labels, no labels can be defined inside of the braces.
 ```rust
 # use datalit::datalit;
 # let data =
-datalit!(42u24, align(4))
+datalit!(0xAA, align(4))
 # ;
 ```
 
-Aligns the current data location to the given number. The number must be a
-power of two. If the current data location is already aligned, this does
-nothing. The bytes will be filled with zero bytes (`0x00`).
+Aligns the current data offset to the next multiple of the given power‑of‑two.
+If already aligned, nothing is added. Padding bytes are `0x00`. A non power‑of‑
+two argument causes a compile error.
 
 ### Mode changes
 
 ```rust
 # use datalit::datalit;
-# let data =
+# let _ =
 datalit!(
-  1u32, // Generated based on the native platform byte order
+  1u32,          // native (depends on target)
   @endian = le,
-  1u32, // Generated as little endian (0x0100_0000)
+  1u32,          // bytes: 01 00 00 00
   @endian = be,
-  1u32, // Generated as big endian (0x0000_0001)
+  1u32,          // bytes: 00 00 00 01
   @endian = ne,
-  1u32, // Back to native platform byte order
+  1u32,          // native again
 )
 # ;
 ```
 
-During the evaluation of a datalit, to avoid excessive repetition, you can
-change the defaults of the generation logic. For example, there is a default
-endian mode for typed integer literals that do not provide an explicit endian
-suffix. When a mode is set, that default will hold until another mode is set.
+Mode changes adjust defaults (currently only integer endianness). The initial
+mode is native (`ne`). It persists until changed again.
 
-### Expression
+### Expression (preview)
 
 ```rust
 # use datalit::datalit;
-# let data =
-datalit!(
-  start('data): u32,
-  'data: b"buffalo",
-)
-# ;
+# let _ = datalit!(
+  len('payload): u32_be,
+  'payload: b"buffalo",
+);
 ```
 
-Gives an expression that can be evaluated to determine the value. This is
-used to interact with labels. See the documentation on expressions for more
-information.
+Expressions (documented later) compute values from labels (`start`, `end`,
+`len`).
 
 ## Entry Sequences
 
@@ -258,6 +259,8 @@ separated by commas. Commas are required between any two entries. Trailing
 commas are permitted.
 
 ## Expressions
+
+TBW.
 
 ## Guarantees
 

@@ -89,3 +89,18 @@ You may use this project under the terms of either license.
 ## Acknowledgements
 
 TBD.
+
+## Future work
+
+- Allow for scoped labels, so they can be used in compound arrays.
+- Add basic math operators, so things like relative offsets or the like can be
+  computed.
+- Allow for alignment to define the fill byte (or make it part of the mode)
+- Implement scoped modes, so mode changes within a block can be made without
+  affecting the outside state.
+- Allow for some relatively common specialized operations, such as CRCs
+- Allow labeled range offsets to be exported along with the data so runtime
+  code can use it as needed.
+- Support for strings, including with multiple encodings
+- Syntax: Have a paren-wrapped entry be treated as an expression (with
+  function calling as a special case)

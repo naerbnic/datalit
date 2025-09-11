@@ -14,3 +14,10 @@ rust-version = "1.89"
 datalit = { version = "0.1.0-alpha.1", path = "datalit" }
 datalit-macros = { version = "0.1.0-alpha.1", path = "datalit-macros" }
 datalit-macros-internals = { version = "0.1.0-alpha.1", path = "datalit-macros-internals" }
+
+[workspace.metadata.release]
+shared-version = true
+allow-branch = ["main"]
+tag-name = "v{{version}}"
+consolidate-commits = true
+dependent-version = "upgrade"

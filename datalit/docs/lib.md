@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD041 -->
+
 This crate defines the [`datalit!`] procedural macro, which generates
 static byte slices from a declarative syntax.
 

@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD041 -->
+
 A macro to create a byte slice with readably described contents.
 
 The `datalit!()` macro can be used as an expression to turn a fluent

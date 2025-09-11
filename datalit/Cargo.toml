@@ -1,7 +1,7 @@
 [package]
 name = "datalit"
 description = "A zero-runtime fluent data description macro"
-keywords = ["macro", "no_std", "serialization", "test", "encoding"]
+keywords = ["macro", "no_std", "binary", "test", "encoding"]
 categories = [
   "development-tools::testing",
   "encoding",

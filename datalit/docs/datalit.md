@@ -74,7 +74,8 @@ let png_data = datalit!(
 # Quick Reference
 
 - Typed integers: `u8 u16 u24 u32 u64 u128 i8 i16 i32 i64 i128`
-  (add `_le` / `_be` for explicit endianness; otherwise current endian mode / native)
+  (add `_le` / `_be` for explicit endianness; otherwise current endian mode /
+  native; both `u32le` and `u32_le` accepted)
 - Untyped hex / binary: `0xABDE`, `0b0010_1111` (must form whole bytes;
   underscores ignored)
 - Byte / byte string / C-string: `b'R'`, `b"buffalo"`, `c"foo"`
@@ -290,7 +291,7 @@ commas are permitted.
 
 These are the currently available expressions:
 
-## Start offset
+## Start Offset
 
 ```ignore
 start('label)
@@ -299,7 +300,7 @@ start('label)
 Returns the unsigned byte offset of the start of the labeled entry from the
 beginning of the returned byte array.
 
-## End offset
+## End Offset
 
 ```ignore
 end('label)
@@ -308,13 +309,13 @@ end('label)
 Returns the unsigned byte offset of the end of the labeled entry from the
 beginning of the returned byte array.
 
-## Entry length
+## Entry Length
 
 ```ignore
 len('label)
 ```
 
-Returns the length of the labeled entry in bytes (i.e. `end('label) - start('label)`)
+Returns the length of the labeled entry in bytes (i.e. `end('label) - start('label)`).
 
 # Guarantees
 

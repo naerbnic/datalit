@@ -13,13 +13,6 @@ static byte slices from a declarative syntax.
 - Zero‑cost & `no_std`: expands to a static byte slice; all validation at
   compile time.
 
-Quick taste:
-
-```rust
-# use datalit::datalit;
-let header = datalit!(0xFF, 42u16_le, b"OK", align(4));
-```
-
 # Example
 
 This is the start of a simple PNG file header and block format:

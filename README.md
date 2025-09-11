@@ -2,22 +2,19 @@
 
 ## Overview
 
-`datalit` is a crate that provides the `datalit!(...)` macro to generate static data described in a fluent style. Features include:
+`datalit` provides the `datalit!(...)` macro to turn a readable list of things
+into real bytes—at compile time. Highlights:
 
-- _Readable_: Multiple ways to express data in an easy to understand way.
-  Choose the one clearest for your use case!
-- _Endian aware_: Working with native data? A file format with a specified
-  endianness? Different endianness needed in different locations? You can
-  declare individual items as being a particular endianness, or declare a
-  default to use.
-- _Cross referenced data_: Need to reference the location of data in a file?
-  You can reference the location without having to count the bytes! References
-  are adjusted automatically even if their locations change. Works with both
-  forward and backward references.
-- _Compile time_: Compiled macros are identical to static byte slices! They can
-  be used in constant and `no_std` environments.
-
-This can be used to make easily readable and maintainable data in tests.
+- _Readable data_: Hard to read raw byte arrays? Describe intent with readable
+  literals.
+- _Endian aware_: Unsure about byte order? Declare it once; the macro
+  handles the rest.
+- _Offsets_: Tired of recalculating offsets? Labels and
+  offset expressions update themselves.
+- _Concise_: Spending time on padding & length management? Built-ins remove
+  the manual bookkeeping.
+- _Zero cost at runtime_: Worried about hidden cost or mistakes? Your data is
+  validated at compile time, and expands to one static slice.
 
 ## Installation
 
@@ -37,49 +34,44 @@ contents of the macro.
 ## Examples
 
 ```rust
-let data = datalit!(
-  // Hexideciaml literals can be of any length. Bytes are used in left-to-right
-  // order.
-  0xDEAD_BEEF_CAFE_BABE,
+use datalit::datalit;
 
-  // So can binary literals
+let data = datalit!(
+  // Hex / binary literals of any length (whole bytes) appended L->R.
+  0xDEAD_BEEF_CAFE_BABE,
   0b0110_1111_1000_0100,
 
-  // Adding a primitive integer suffix creates a value of that type. By default,
-  // it uses native byte order
-  1u32, 0x1FFu16
+  // Primitive integers: native endian by default.
+  1u32, 0x1FFu16,
 
-  // You can annotate it with a byte order spec (one of le, be, or ne) to change
-  // the byte order of the expression.
-  100_u16_le,
+  // Explicit endianness via suffix or mode.
+  100u16_le,
+  @endian = be,
+  42u32,           // big-endian now
 
-  // You can set the endian mode to change the current default
-  @endian_mode = le,
-  99u16,
+  // Non-standard width.
+  0x01_02_03u24_be,
 
-  // There are a few nonstandard types for convenience
-  199687u24,
+  // Strings / bytes.
+  b"quux", b'X', c"Hello, world!",
 
-  // Byte string literals and byte literals translate to their natural values
-  b"abcde\66",
-  b'X',
+  // Alignment to next multiple of 8 (pads with 0x00)
+  align(8),
 
-  // C string literals translate to a null-terminated ASCII string.
-  c"Hello, world!",
-
-  // Labels can be used to reference the offset of an expression in the datalit
-  // expression. start('label) and end('label) write the value with the given
-  // data format.
-  start(u16, 'buffer),
-  end(u16, 'buffer),
-
-  // Braces can be used to group multiple entries. Labels on them reference the
-  // entire range of data.
-  'buffer {
+  // A labeled block and offset expressions.
+  start('payload): u16_le,
+  'payload: {
     12u16,
-    b"quux",
-  }
+    b"PAY",
+  },
+  end('payload): u16_le,
+  len('payload): u16_le,
+
+  // Simple repetition & compound arrays.
+  [ 0xFF; 4 ],
+  [{ 0xAA, 0xBB }; 2],
 );
+assert!(data.len() > 0);
 ```
 
 ## Contributing
@@ -88,7 +80,8 @@ TBD.
 
 ## License
 
-This project is dual-licensed under either the MIT or Apache 2.0 license, at your option.
+This project is dual-licensed under either the MIT or Apache 2.0 license, at
+your option.
 
 - See [LICENSE-MIT](./LICENSE-MIT) for the MIT license text.
 - See [LICENSE-APACHE](./LICENSE-APACHE) for the Apache 2.0 license text.

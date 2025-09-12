@@ -1,0 +1,34 @@
+name: Feature request
+description: Propose a new capability or syntax
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      placeholder: Describe the use case and why existing options aren’t sufficient.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed syntax/semantics
+      render: rust
+      placeholder: |
+        // Example datalit! usage:
+        let bytes = datalit!( /* ... */ );
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks/tradeoffs
+  - type: input
+    id: priority
+    attributes:
+      label: Priority/impact
+      placeholder: nice-to-have / important / blocking

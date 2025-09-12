@@ -1,5 +1,10 @@
 # `datalit`
 
+[![Crates.io](https://img.shields.io/crates/v/datalit.svg)](https://crates.io/crates/datalit)
+[![docs.rs](https://docs.rs/datalit/badge.svg)](https://docs.rs/datalit)
+[![CI](https://github.com/naerbnic/datalit/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/naerbnic/datalit/actions/workflows/ci.yaml)
+[![License: MIT/Apache-2.0](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](https://github.com/naerbnic/datalit#license)
+
 ## Overview
 
 `datalit` provides the `datalit!(...)` macro to turn a readable list of things

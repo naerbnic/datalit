@@ -4,16 +4,16 @@ members = ["datalit", "datalit-macros", "datalit-macros-internals", "private/*"]
 
 [workspace.package]
 edition = "2024"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/naerbnic/datalit"
 documentation = "https://docs.rs/datalit"
 rust-version = "1.89"
 
 [workspace.dependencies]
-datalit = { version = "0.1.0-alpha.1", path = "datalit" }
-datalit-macros = { version = "0.1.0-alpha.1", path = "datalit-macros" }
-datalit-macros-internals = { version = "0.1.0-alpha.1", path = "datalit-macros-internals" }
+datalit = { version = "0.1.0-alpha.2", path = "datalit" }
+datalit-macros = { version = "0.1.0-alpha.2", path = "datalit-macros" }
+datalit-macros-internals = { version = "0.1.0-alpha.2", path = "datalit-macros-internals" }
 
 [workspace.metadata.release]
 shared-version = true

@@ -21,7 +21,7 @@ into real bytes—at compile time. Highlights:
 `datalit` can be added using the standard `cargo add` command:
 
 ```shell
-$ cargo add --git https://github.com/naerbnic/datalit.git datalit
+$ cargo add datalit
 ...
 ```
 

@@ -1,0 +1,66 @@
+name: Bug report
+description: Report a problem with datalit
+labels: [bug]
+body:
+  - type: checkboxes
+    id: sanity
+    attributes:
+      label: Pre-flight
+      options:
+        - label: I’ve searched existing issues
+          required: true
+        - label: I’ve read the docs (README and docs.rs)
+          required: true
+        - label: I can reproduce on the latest released version
+          required: true
+  - type: dropdown
+    id: affected
+    attributes:
+      label: Affected crate(s)
+      description: Select all that apply
+      multiple: true
+      options:
+        - datalit (public)
+        - datalit-macros (internal)
+        - datalit-macros-internals (internal)
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Crate version(s)
+      description: e.g. datalit = "0.1.0-alpha.1"
+      placeholder: datalit = "0.1.0-alpha.X"
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: What happened? What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproducible example
+      description: Provide a small datalit! snippet and expected vs actual bytes.
+      render: rust
+      placeholder: |
+        use datalit::datalit;
+        let bytes = datalit!( /* ... */ );
+        assert_eq!(bytes, /* expected */);
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: rustc/cargo versions, OS/arch
+      placeholder: |
+        rustc --version:
+        cargo --version:
+        OS/arch:
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      placeholder: Endianness mode (@endian), cargo expand output, logs, etc.

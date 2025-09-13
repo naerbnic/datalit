@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Support
+    url: https://github.com/naerbnic/datalit/discussions
+    about: Please ask and answer questions here.
+  - name: Security Policy
+    url: https://github.com/naerbnic/datalit/security/policy
+    about: Report security vulnerabilities via the security policy.

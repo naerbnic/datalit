@@ -1,0 +1,32 @@
+name: Regression
+description: Something that used to work now fails
+labels: [regression]
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Last known good vs first bad (e.g., 0.1.0-alpha.1 → 0.1.0-alpha.2)
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproducible example
+      render: rust
+      placeholder: |
+        use datalit::datalit;
+        let bytes = datalit!( /* ... */ );
+        assert_eq!(bytes, /* expected */);
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: rustc/cargo versions, OS/arch
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      placeholder: Bisect info, changes between versions, etc.

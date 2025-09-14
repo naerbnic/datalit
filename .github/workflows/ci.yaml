@@ -51,10 +51,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run cargo-deny checks
-        uses: EmbarkStudios/cargo-deny-action@v1
+        uses: EmbarkStudios/cargo-deny-action@v2
 
   package-leaf:
-    name: cargo package (leaf crate)
+    name: cargo package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

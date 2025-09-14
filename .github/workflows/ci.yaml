@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   checks:
-    name: checks (fmt, clippy, test, docs) — ${{ matrix.os }}
+    name: checks-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -36,7 +36,7 @@ jobs:
         run: cargo doc --workspace --no-deps
 
   msrv:
-    name: MSRV build
+    name: msrv-build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +54,7 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v2
 
   package-leaf:
-    name: cargo package
+    name: cargo-package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

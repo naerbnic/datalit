@@ -1,6 +1,7 @@
 [package]
 name = "datalit-macros"
 description = "Internals for the datalit crate"
+readme = "README.md"
 license.workspace = true
 version.workspace = true
 edition.workspace = true

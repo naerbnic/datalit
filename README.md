@@ -12,8 +12,8 @@ into real bytes—at compile time. Highlights:
 
 - _Readable data_: Hard to read raw byte arrays? Describe intent with readable
   literals.
-- _Endian aware_: Unsure about byte order? Declare it once; the macro
-  handles the rest.
+- _Endian aware_: Can't read bytes backwards? Declare the endianness; the
+  macro handles the rest.
 - _Offsets_: Tired of recalculating offsets? Labels and
   offset expressions update themselves.
 - _Concise_: Spending time on padding & length management? Built-ins remove
@@ -81,7 +81,19 @@ assert!(data.len() > 0);
 
 ## Contributing
 
-TBD.
+Contributions are welcome! If you’ve got a bug report, idea, or small fix:
+
+- Use the issue templates to file bugs or propose features.
+- For small docs or code tweaks, open a PR directly.
+- For larger changes (new syntax, behavior, or breaking changes), please open an issue or discussion first so we can align on design.
+
+Before you open a PR, please:
+
+- Run formatting and lints (we deny warnings) and the test/docs suites.
+- Keep the public crate `no_std` and `forbid(unsafe_code)` guarantees intact.
+- Add or update tests and docs for user-visible changes.
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for details on the workflow and guidelines.
 
 ## License
 
@@ -95,7 +107,9 @@ You may use this project under the terms of either license.
 
 ## Acknowledgements
 
-TBD.
+Thanks to the Rust macros and tooling ecosystem—particularly `syn`, `quote`, and `proc-macro2`—for making ergonomic proc-macros possible.
+
+And thanks in advance to contributors for bug reports, ideas, and reviews.
 
 ## Future work
 

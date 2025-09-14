@@ -10,14 +10,14 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
 name = "datalit"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "datalit-macros",
 ]
 
 [[package]]
 name = "datalit-macros"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "datalit-macros-internals",
  "proc-macro2",
@@ -25,7 +25,7 @@ dependencies = [
 
 [[package]]
 name = "datalit-macros-internals"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "derive-syn-parse",
  "num",
@@ -176,7 +176,7 @@ checksum = "5a5f39404a5da50712a4c1eecf25e90dd62b613502b7e925fd4e4d19b5c96512"
 
 [[package]]
 name = "workspace-doc-test"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.3"
 dependencies = [
  "datalit",
 ]

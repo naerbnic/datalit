@@ -38,7 +38,6 @@ jobs:
   msrv:
     name: MSRV build
     runs-on: ubuntu-latest
-    # Replace with your actual MSRV once finalized
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.89.0
@@ -63,3 +62,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Package datalit-macros-internals
         run: cargo package --no-verify -p datalit-macros-internals --allow-dirty --list
+      - name: Package datalit-macros
+        run: cargo package --no-verify -p datalit-macros --allow-dirty --list
+      - name: Package datalit
+        run: cargo package --no-verify -p datalit --allow-dirty --list

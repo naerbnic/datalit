@@ -1,0 +1,9 @@
+# This is the configuration file for cargo-deny.
+
+[licenses]
+# List of explicitly allowed licenses
+# See https://spdx.org/licenses/ for list of possible licenses
+#
+# We include "Unicode-3.0" because it's used by a dependency of proc_macro2.
+# At a glance, it seems to be a permissive license similar to MIT or Apache-2.0.
+allow = ["MIT", "Apache-2.0", "Unicode-3.0"]

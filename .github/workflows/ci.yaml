@@ -11,54 +11,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  fmt:
-    name: rustfmt
-    runs-on: ubuntu-latest
+  checks:
+    name: checks (fmt, clippy, test, docs) — ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt
+          components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
-      - name: Check formatting
+      - name: rustfmt (deny diffs)
         run: cargo fmt --all -- --check
-
-  clippy:
-    name: clippy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-      - uses: Swatinem/rust-cache@v2
-      - name: Clippy (deny warnings)
+      - name: clippy (deny warnings)
         run: cargo clippy --workspace -- -D warnings
-
-  test:
-    name: tests (stable)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Test workspace
+      - name: tests
         run: cargo test --workspace --all-targets
-
-  docs:
-    name: docs (rustdoc -D warnings)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - name: Build docs
-        run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
+      - name: rustdoc (deny warnings)
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --no-deps
 
   msrv:
     name: MSRV build
     runs-on: ubuntu-latest
-    # Replace with your actual MSRV once finalized
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.89.0
@@ -66,8 +45,16 @@ jobs:
       - name: Build on MSRV
         run: cargo build --workspace
 
+  deny:
+    name: cargo-deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run cargo-deny checks
+        uses: EmbarkStudios/cargo-deny-action@v2
+
   package-leaf:
-    name: cargo package (leaf crate)
+    name: cargo package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -75,3 +62,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Package datalit-macros-internals
         run: cargo package --no-verify -p datalit-macros-internals --allow-dirty --list
+      - name: Package datalit-macros
+        run: cargo package --no-verify -p datalit-macros --allow-dirty --list
+      - name: Package datalit
+        run: cargo package --no-verify -p datalit --allow-dirty --list

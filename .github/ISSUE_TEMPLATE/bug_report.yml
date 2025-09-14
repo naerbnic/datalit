@@ -11,8 +11,25 @@ body:
           required: true
         - label: I’ve read the docs (README and docs.rs)
           required: true
-        - label: I can reproduce on the latest released version
-          required: true
+  - type: dropdown
+    id: tried_latest
+    attributes:
+      label: Tried latest released version?
+      options: ["Yes", "No", "Unable"]
+    validations:
+      required: true
+  - type: dropdown
+    id: tried_main
+    attributes:
+      label: Tried main (or a recent commit)?
+      options: ["Yes", "No"]
+    validations:
+      required: false
+  - type: textarea
+    id: constraints
+    attributes:
+      label: If not on latest, why?
+      placeholder: MSRV pinned, corporate policy, CI environment, etc.
   - type: dropdown
     id: affected
     attributes:

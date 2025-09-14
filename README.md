@@ -9,7 +9,7 @@
 ## Overview
 
 `datalit` provides the `datalit!(...)` macro to turn a readable list of things
-into real bytes—at compile time. Highlights:
+into real bytes at compile time. Highlights:
 
 - _Readable data_: Hard to read raw byte arrays? Describe intent with readable
   literals.

@@ -4,6 +4,7 @@
 [![docs.rs](https://docs.rs/datalit/badge.svg)](https://docs.rs/datalit)
 [![CI](https://github.com/naerbnic/datalit/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/naerbnic/datalit/actions/workflows/ci.yaml)
 [![License: MIT/Apache-2.0](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](https://github.com/naerbnic/datalit#license)
+[![MSRV](https://img.shields.io/badge/MSRV-1.89-blue)](./CONTRIBUTING.md#toolchains--msrv)
 
 ## Overview
 
@@ -104,6 +105,10 @@ your option.
 - See [LICENSE-APACHE](./LICENSE-APACHE) for the Apache 2.0 license text.
 
 You may use this project under the terms of either license.
+
+## Security
+
+Please do not report vulnerabilities in public issues. For private disclosure instructions, see [SECURITY.md](./SECURITY.md).
 
 ## Acknowledgements
 

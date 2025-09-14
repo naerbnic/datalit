@@ -1,0 +1,23 @@
+name: Docs improvement
+description: Suggest edits to README/docs.rs
+labels: [docs]
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Page/section
+      placeholder: Link to docs.rs or file (e.g., datalit/docs/datalit.md)
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: What needs to change?
+      placeholder: What’s confusing or incorrect?
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested wording or example
+      render: markdown

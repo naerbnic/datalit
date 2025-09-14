@@ -3,6 +3,7 @@ name = "workspace-doc-test"
 publish = false
 version.workspace = true
 edition.workspace = true
+license.workspace = true
 
 [dev-dependencies]
 datalit = { workspace = true }
